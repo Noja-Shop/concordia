@@ -18,7 +18,7 @@ namespace Noja.API.Endpoints.ProductEndpoints
             public const string GetProductById = $"{Base}/get";
             public const string UpdateProductStock = $"{Base}/stock";
             public const string GetProductByCategory = $"{Base}/category";
-            public const string GetProductBySearch = $"{Base}/search";
+            public const string GetProductForAdminBySearch = $"{Base}/admin/search";
             
         }
     }

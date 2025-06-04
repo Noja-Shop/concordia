@@ -111,6 +111,26 @@ namespace Noja.API.Controllers.Products
             }
             return Ok(result);
         }
+
+        [Authorize]
+        [HttpGet(Endpoints.ProductEndpoints.ProductsAPIEndpoints.Product.GetProductForAdminBySearch)]
+        public async Task<IActionResult> SearchProductsForAdmin([FromQuery] string q)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+            {
+                return BadRequest(new {
+                    success = false,
+                    message = "Search term 'q' is required"
+                });
+            }
+
+            var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _productService.SearchProductsForAdmin(q, adminId);
+
+            if (!result.Success) return BadRequest(result);
+            return Ok(result);
+
+        }
           
     }
 }
