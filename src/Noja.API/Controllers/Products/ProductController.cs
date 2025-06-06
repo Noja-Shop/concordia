@@ -131,6 +131,44 @@ namespace Noja.API.Controllers.Products
             return Ok(result);
 
         }
+
+        // ========== Customer Endpoints ============= //
+
+        [HttpGet(Endpoints.ProductEndpoints.ProductsAPIEndpoints.Product.GetActiveProductForCustomer)]
+        public async Task<IActionResult> SearchAllActiveProductsForCustomer()
+        {
+            var result = await _productService.GetActiveProductsForCustomerAsync();
+
+            if (!result.Success) return BadRequest(result);
+
+            return Ok(result);
+            
+        }
+
+        [HttpGet(Endpoints.ProductEndpoints.ProductsAPIEndpoints.Product.SearchProductsForCustomer)]
+        public async Task<IActionResult> SearchProductsForCustomer([FromQuery] string q)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+            {
+                return BadRequest(new {
+                    success = false,
+                    message = "Search term 'q' is required"
+                });
+            }
+            var result = await _productService.SearchProductsForCustomersAsync(q);
+            if (!result.Success) return BadRequest(result);
+            return Ok(result);
+        }
+
+        [HttpGet(Endpoints.ProductEndpoints.ProductsAPIEndpoints.Product.GetProductDetailsForCustomer)]
+        public async Task<IActionResult> SearchProductDetailsForCustomer(Guid id)
+        {
+            var result = await _productService.GetProductDetailsForCustomerAsync(id);
+
+            if(!result.Success) return NotFound(result);
+            return Ok(result);
+
+        }
           
     }
 }
