@@ -8,11 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Noja.Core.Entity;
-using Noja.Core.Interfaces.Repository;
 using Noja.Infrastructure.Authentication;
 using Noja.Infrastructure.Data;
 using Noja.Infrastructure.Options;
-using Noja.Infrastructure.Repositories;
 
 
 
@@ -49,7 +47,6 @@ namespace Noja.Infrastructure
             .AddSignInManager<SignInManager<NojaUser>>();
 
             services.AddScoped<ITokenService, JwtTokenGenerator>();
-            services.AddScoped<IAdminRepository, AdminRepository>();
 
             return services;
         }
