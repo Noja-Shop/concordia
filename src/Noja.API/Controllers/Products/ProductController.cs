@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Noja.Application.Models.ProductDTO;
 using Noja.Application.Services.Products;
-using Noja.Core.Interfaces.Services;
+using Noja.Core.Interfaces.Service;
 using Noja.Core.Models.ProductDTO;
 
 namespace Noja.API.Controllers.Products
@@ -74,7 +74,7 @@ namespace Noja.API.Controllers.Products
         public async Task<IActionResult> GetAllProductsForAdmin()
         {
             var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _productService.GetAllProductsForAdminAsync(adminId);
+            var result = await _productService.GetAllProductsAsync();
             if (!result.Success)
             {
                 return NotFound(result);
@@ -137,7 +137,7 @@ namespace Noja.API.Controllers.Products
         [HttpGet(Endpoints.ProductEndpoints.ProductsAPIEndpoints.Product.GetActiveProductForCustomer)]
         public async Task<IActionResult> SearchAllActiveProductsForCustomer()
         {
-            var result = await _productService.GetActiveProductsForCustomerAsync();
+            var result = await _productService.GetActiveProductsAsync();
 
             if (!result.Success) return BadRequest(result);
 

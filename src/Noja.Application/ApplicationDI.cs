@@ -7,7 +7,8 @@ using Noja.Application.Services.Admin;
 using Noja.Application.Services.Admin.Interface;
 using Noja.Application.Services.Auth;
 using Noja.Application.Services.Products;
-using Noja.Core.Interfaces.Services;
+using Noja.Core.Interfaces.Service;
+
 
 namespace Noja.Application
 {
@@ -20,9 +21,10 @@ namespace Noja.Application
             services.AddScoped<ILogoutService, LogoutService>();
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IAdminService, AdminService>();
-            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IProductService, ProductService2>();
 
             return services;
         }
     }
 }
+
