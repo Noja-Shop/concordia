@@ -64,13 +64,13 @@ namespace Noja.Infrastructure.Repository
                 .ToListAsync();
         }
 
-        public async Task<List<Product>> GetByCategoryAsync(ProductCategory category, bool IncludeInactive = false)
+        public async Task<List<Product>> GetByCategoryAsync(ProductCategory category, bool includeInactive = false)
         {   
             var query =  _context.Products
             .Where(p => p.Category == category)
             .OrderBy(p => p.Name).AsQueryable();   
 
-            if (!IncludeInactive)
+            if (!includeInactive)
             {
                 query = query.Where(p => p.IsActive && p.Quantity > 0);
             }
@@ -78,14 +78,14 @@ namespace Noja.Infrastructure.Repository
             return await query.ToListAsync();
         }
 
-        public async Task<List<Product>> SearchProductsAsync(string searchTerm, bool IncludeInactive = false)
+        public async Task<List<Product>> SearchProductsAsync(string searchTerm, bool includeInactive = false)
         {
             searchTerm = searchTerm.ToLower().Trim();
             var searchWords = searchTerm.Split(' ',StringSplitOptions.RemoveEmptyEntries);
 
             var query =  _context.Products.AsQueryable();
 
-            if (!IncludeInactive)
+            if (!includeInactive)
             {
                 query = query.Where(p => p.IsActive && p.Quantity > 0);
             }
@@ -98,7 +98,6 @@ namespace Noja.Infrastructure.Repository
             query = query.OrderBy(p => p.Name.ToLower().StartsWith(searchTerm) ? 0 : 1)
             .ThenBy(p => p.Name);
             return await query.ToListAsync();
-
 
         }
 
@@ -121,7 +120,7 @@ namespace Noja.Infrastructure.Repository
             
         }
 
-        public async Task<int> GetProducCountAsync(bool includeInactive = false)
+        public async Task<int> GetProductCountAsync(bool includeInactive = false)
         {
             if (!includeInactive)
             {

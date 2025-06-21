@@ -102,7 +102,7 @@ namespace Noja.Core.Interfaces.Repository
         // <param name="includeInactive">If to include inactive products in count</param>
         // <returns> Total number of products </returns>
         // </summary>
-        Task<int> GetProducCountAsync(bool includInactive = false);
+        Task<int> GetProductCountAsync(bool includInactive = false);
 
 
 
