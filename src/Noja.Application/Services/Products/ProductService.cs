@@ -313,7 +313,7 @@ namespace Noja.Application.Services.Products
 
             try
             {
-                if (newQuantity > 0)
+                if (newQuantity < 0)
                 {
                     response.Success = false;
                     response.Message = "Quantity cannot be negative";
