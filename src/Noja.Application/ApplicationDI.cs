@@ -21,7 +21,7 @@ namespace Noja.Application
             services.AddScoped<ILogoutService, LogoutService>();
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IAdminService, AdminService>();
-            services.AddScoped<IProductService, ProductService2>();
+            services.AddScoped<IProductService, ProductService>();
 
             return services;
         }

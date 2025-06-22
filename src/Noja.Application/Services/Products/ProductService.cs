@@ -5,18 +5,16 @@ using System.Threading.Tasks;
 using Noja.Application.Models.Common;
 using Noja.Application.Models.ProductDTO;
 using Noja.Core.Entity;
-using Noja.Core.Enums;
 using Noja.Core.Interfaces.Repository;
 using Noja.Core.Interfaces.Service;
-using Noja.Infrastructure.Repository;
 
 namespace Noja.Application.Services.Products
 {
-    public class ProductService2 : IProductService
+    public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
 
-        public ProductService2(IProductRepository productRepository)
+        public ProductService(IProductRepository productRepository)
         {
             _productRepository = productRepository;
         }
@@ -114,27 +112,6 @@ namespace Noja.Application.Services.Products
                 return response;
             }
         }
-
-        // public async Task<ServiceResponse<List<ProductSummaryDto>>> GetActiveProductsSummaryAsync()
-        // {
-        //     var response = new ServiceResponse<List<ProductSummaryDto>>();
-
-        //     try
-        //     {
-        //         var products = await _productRepository.GetActiveProductsAsync();
-
-        //         response.Success = true;
-        //         response.Data = products.Select(MapToProductSummaryDto).ToList();
-        //         response.Message = $"Successfully retrieved {products.Count} products";
-        //         return response;
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         response.Success = false;
-        //         response.Message = $"Error retrieving products: {ex.Message}";
-        //         return response;
-        //     }
-        // }
 
         public async Task<ServiceResponse<List<ProductDto>>> GetAllProductsAsync()
         {
