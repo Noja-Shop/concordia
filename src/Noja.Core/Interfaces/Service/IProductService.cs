@@ -30,26 +30,118 @@ namespace Noja.Core.Interfaces.Service
         // <returns>
         // ServiceResponse containing: 
         // -Success: AdminProductDto with complete productdetails including admin ID
-        // -Failure: Erros msg with validation details or system error information
+        // -Failure: Errors msg with validation details or system error information
         // </returns>
         Task<ServiceResponse<AdminProductDto>> CreateProductAsync(CreateProductDto createproductDto, string adminId);
 
-        
+        // <summary>
+        // Updates an exisiting product (Admin only)
+        // <param name = "UpdateProductDto"> Product update data transfer object contining all the required fields for updating/editing a product
+        // <param name = "ID"> Guid id for the specific product to be updated>
+        // <returns>
+        // ServiceResponse containing
+        // -Success: UpdateProductDto with complete productdetails including admin ID
+        // -Failure: Errors msg with validation details or system error information
+        // </returns>
+        // </summary>
         Task<ServiceResponse<AdminProductDto>> UpdateProductAsync(Guid id, UpdateProductDto updateproductDto, string adminId);
-        Task<ServiceResponse<AdminProductDto>> DeleteProductAsync(Guid id, string adminId);
-        Task<ServiceResponse<AdminProductDto>> UpdateProductStockAsync(Guid id, int newQuantity, string adminId);
-        Task<ServiceResponse<AdminProductDto>> GetProductForAdminAsync(Guid id, string adminId);
-        Task<ServiceResponse<ProductDto>> GetProductDetailsForCustomerAsync(Guid id);
-        Task<ServiceResponse<List<ProductDto>>> GetAllProductsAsync();
-        Task<ServiceResponse<List<ProductDto>>> GetActiveProductsAsync();
-        Task<ServiceResponse<List<ProductDto>>> GetProductsByCategoryAsync(string category);
-        Task<ServiceResponse<List<ProductSummaryDto>>> SearchProductsForCustomersAsync(string searchTerm);
-        Task<ServiceResponse<List<AdminProductDto>>> SearchProductsForAdmin(string searchTerm, string adminId);
 
         // <summary>
-        // Gets all active products with summary information for listings
+        // Remove an exisiting product (Admin only)
+        // <param name = "ID"> Guid id for the specific product to be deleted>
+        // <returns>
+        // ServiceResponse containing
+        // -Success: Returns a succeeful msg for the deleted product
+        // -Failure: Errors msg with validation details or system error information
+        // </returns>
         // </summary>
-        // Task<ServiceResponse<List<ProductSummaryDto>>> GetActiveProductsSummaryAsync();
+        Task<ServiceResponse<AdminProductDto>> DeleteProductAsync(Guid id, string adminId);
+
+        // <summary>
+        // Updates an exisiting product qunatity(stock) (Admin only)
+        // <param name = "newQuantity"> Product update data transfer object contining all the required fields for updating/editing a product
+        // <param name = "ID"> Guid id for the specific product quantity field to be updated>
+        // <returns>
+        // ServiceResponse containing
+        // -Success: quantity with new or updated quantity (shows the old -- new)
+        // -Failure: Errors msg with validation details or system error information
+        // </returns>
+        // </summary>
+        Task<ServiceResponse<AdminProductDto>> UpdateProductStockAsync(Guid id, int newQuantity, string adminId);
+
+        // <summary>
+        // Retrives a specific product (Admin only)
+        // <param name = "ID"> Guid id for the specific product to be retrieved>
+        // <returns>
+        // ServiceResponse containing
+        // -Success: A product with its details
+        // -Failure: Errors msg with validation details or system error information
+        // </returns>
+        // </summary>
+        Task<ServiceResponse<AdminProductDto>> GetProductForAdminAsync(Guid id, string adminId);
+
+        // <summary>
+        // Retrieve a specific product to the customer
+        // <param name = "ID"> Guid id for the specific product to be retrieved>
+        // <returns>
+        // ServiceResponse containing
+        // -Success: Retrieved product along with its details/description
+        // -Failure: Errors msg with validation details or system error information
+        // </returns>
+        // </summary>
+        Task<ServiceResponse<ProductDto>> GetProductDetailsForCustomerAsync(Guid id);
+
+        // <summary>
+        // All products are retrieved even if out of stock
+        // ServiceResponse containing
+        // -Success: JSON of existing products
+        // -Failure: Errors msg with validation details or system error information
+        // </returns>
+        // </summary>
+        Task<ServiceResponse<List<ProductDto>>> GetAllProductsAsync();
+
+        // <summary>
+        // Retrieves Products that a customer can buy ie quantity is > 0
+        // <returns>
+        // ServiceResponse containing
+        // -Success: JSON of all products where quantity > 0
+        // -Failure: Errors msg with validation details or system error information
+        // </returns>
+        // </summary>
+        Task<ServiceResponse<List<ProductDto>>> GetActiveProductsAsync();
+
+        // <summary>
+        // Retrieves a products based on a specific category [Fruits Category]
+        // <param name = "category"> A specific group/label of products>
+        // <returns>
+        // ServiceResponse containing
+        // -Success: Returns all products associated with a particular category
+        // -Failure: Errors msg with validation details or system error information
+        // </returns>
+        // </summary>
+        Task<ServiceResponse<List<ProductDto>>> GetProductsByCategoryAsync(string category);
+
+        // <summary>
+        // A query parameter for a product can be specific or general
+        // <param name = "searchTerm"> The name of the product/description/category>
+        // <returns>
+        // ServiceResponse containing
+        // -Success: A product or products based on the searchTerm
+        // -Failure: Errors msg with validation details or system error information
+        // </returns>
+        // </summary>
+        Task<ServiceResponse<List<ProductSummaryDto>>> SearchProductsForCustomersAsync(string searchTerm);
+
+        // <summary>
+        // A query parameter for a product can be specific or general(admin only)
+        // <param name = "searchTerm"> The name of the product/description/category>
+        // <returns>
+        // ServiceResponse containing
+        // -Success: A product or products based on the searchTerm
+        // -Failure: Errors msg with validation details or system error information
+        // </returns>
+        // </summary>
+        Task<ServiceResponse<List<AdminProductDto>>> SearchProductsForAdmin(string searchTerm, string adminId);
 
     }
 }
