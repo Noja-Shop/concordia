@@ -6,10 +6,10 @@ Noja API built with .NET 9, implementing Clean Architecture principles and SOLID
 This solution follows Clean Architecture with clear separation of concerns:
 
 src/
-├── Noja.API/              # Presentation Layer (Controllers, Endpoints)
-├── Noja.Application/      # Application Layer (Services, DTOs, Business Logic)
-├── Noja.Core/            # Domain Layer (Entities, Interfaces, Enums)
-└── Noja.Infrastructure/   # Infrastructure Layer (Data, Authentication, External Services)
+- Noja.API/              # Presentation Layer (Controllers, Endpoints)
+- Noja.Application/      # Application Layer (Services, DTOs, Business Logic)
+- Noja.Core/            # Domain Layer (Entities, Interfaces, Enums)
+- Noja.Infrastructure/   # Infrastructure Layer (Data, Authentication, External Services)
 
 ## Key Architectural Patterns
 - Clean Architecture - Dependency inversion and separation of concerns
@@ -81,23 +81,26 @@ dotnet run
 
 ### Project Structure
 src/
-├── Noja.API/
-│   ├── Controllers/           # API Controllers
-│   ├── Endpoints/            # Route definitions
-│   └── Program.cs            # Application entry point
-├── Noja.Application/
-│   ├── Models/               # DTOs and ViewModels
-│   ├── Services/             # Business logic
-│   └── ApplicationDI.cs      # DI registration
-├── Noja.Core/
-│   ├── Entity/               # Domain entities
-│   ├── Enums/               # Domain enums
-│   └── Interfaces/          # Contracts
-└── Noja.Infrastructure/
-    ├── Data/                # DbContext and configurations
-    ├── Authentication/      # JWT implementation
-    ├── Repositories/        # Data access
-    └── InfrastructureDI.cs  # DI registration
+*Noja.API/
+-Controllers/           # API Controllers
+-Endpoints/            # Route definitions
+-Program.cs            # Application entry point
+
+*Noja.Application/
+-Models/               # DTOs and ViewModels
+-Services/             # Business logic
+-ApplicationDI.cs      # DI registration
+
+*Noja.Core/
+-Entity/               # Domain entities
+-Enums/               # Domain enums
+-Interfaces/          # Contracts
+
+*Noja.Infrastructure/
+-Data/                # DbContext and configurations
+-Authentication/      # JWT implementation
+-Repositories/        # Data access
+-InfrastructureDI.cs  # DI registration
 
 #### API Response Format
 All API Endpoints return a consistent response format:
