@@ -81,6 +81,7 @@ dotnet run
 
 ### Project Structure
 src/
+
 *Noja.API/
 -Controllers/           # API Controllers
 -Endpoints/            # Route definitions
