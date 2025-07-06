@@ -22,15 +22,36 @@ namespace Noja.Core.Entity
         [MaxLength(500)]
         public string Description {get; set;}
 
+        // <summary>
+        // Full price of the package. eg, N4,800 for 50kg bag of rice
+        // </summary>
         [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Package price must be greater than 0")]
         [Column(TypeName = "decimal(18,2)" )]
-        public decimal Price {get; set;} 
-        // price per unit (per kg,per piece etc)
-
+        public decimal PackagePrice {get; set;} 
+        
+        // <summary>
+        // Price of a single unit of the product. eg, N100 for 50kg bag of rice
+        // e.g, N100 per kg
+        // </summary>
         [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Unit price must be greater than 0")]
         [Column(TypeName = "decimal(10,2)")]
-        public decimal UnitSize {get; set;} 
-        // 50 for 50kg bag, 1 for 1 piece
+        public decimal UnitPrice {get; set;}
+
+        //<summary>
+        // Size of one package. eg, 50kg bag of rice
+        // </summary>
+        [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Package size must be greater than 0")]
+        [Column(TypeName = "decimal(10,3)")]
+        public decimal PackageSize { get; set; }
+       
+       [Required]
+       public MeasurementUnit MeasurementUnit {get; set;}
+
+       [Required]
+       public PackageType PackageType {get; set;}
 
         [Required]
         public int Quantity {get; set;} // Available stock in number
@@ -38,9 +59,6 @@ namespace Noja.Core.Entity
 
         [Required]
         public ProductCategory Category {get; set;}
-
-        [Required]
-        public UnitOfMeasure UnitOfMeasure {get; set;}
 
         public string CreatedBy {get;set;}
 
@@ -51,115 +69,82 @@ namespace Noja.Core.Entity
         
         public DateTime? UpdatedAt { get; set; }
 
+        // ======== Contants =======//
+        private const string CURRENCY_SYMBOL = "₦";
+
+        // ==========Calulated Properties =========//
+
+        [NotMapped]
+        public bool IsInStock => Quantity > 0 && IsActive;
+
+        [NotMapped]
+        public bool IsSingleUnit => PackageSize == 1;
+
+
         //===== Display properties =======//
 
         [NotMapped]
-        public string UnitAbbreviation => GetUnitAbbreviation();
+        public string MeasurementUnitDisplay => GetMeasurementUnitDisplay();
 
-        //<Summary>
-        // Gets the package type name (bag, bottle, pack, etc)
-
-        private string GetUnitAbbreviation()
+        private string GetMeasurementUnitDisplay()
         {
-            return UnitOfMeasure switch
+            return MeasurementUnit switch
             {
-                UnitOfMeasure.Kilogram => "Kg",
-                UnitOfMeasure.Piece => "pc",
-                UnitOfMeasure.Bag => "bag",
-                UnitOfMeasure.Box => "box",
+                MeasurementUnit.Kilogram => "kg",
+                MeasurementUnit.Liter => "L",
+                MeasurementUnit.Piece => "piece",
                 _ => "unit"
             };
         }
 
         [NotMapped]
-        public string PackageType => GetPackageType();
-
-        //<Summary>
-        // Gets total price for one complete paackage
-
-        private string GetPackageType()
+        public string PackageTypeDisplay => GetPackageTypeDisplay();
+        
+        private string GetPackageTypeDisplay()
         {
-           return UnitOfMeasure switch
+            return PackageType switch
             {
-                UnitOfMeasure.Kilogram => "Kg",
-                UnitOfMeasure.Piece => "pc",
-                UnitOfMeasure.Bag => "bag",
-                UnitOfMeasure.Box => "box",
+                PackageType.Bag => "bag",
+                PackageType.Box => "box",
+                PackageType.Can => "can",
+                PackageType.Sack => "sack",
+                PackageType.Carton => "carton",
                 _ => "package"
             };
         }
 
         [NotMapped]
-        public string DisplayName => GetDisplayName();
+        public string ProductDisplayName => GetProductDisplayName();
+
+        private string GetProductDisplayName()
+        {
+            if (IsSingleUnit)
+                return Name;
+            
+            return $"{Name} - {PackageSize:G29}{MeasurementUnitDisplay} {PackageTypeDisplay}";
+        }
+        
+        // <summary>
+        // Shows the package full price (e.g "N152.00 for 50kg bag")
+        // </summary>
+        [NotMapped]
+        public string PackagePriceDisplay => $"{CURRENCY_SYMBOL}{PackagePrice:N2}";
 
         // <summary>
-        // Gets unit price display text (e.g "N125.00 for 50kg bag)
-
-        private string GetDisplayName()
-        {
-            if (UnitSize == 1 && (UnitOfMeasure == UnitOfMeasure.Piece || UnitOfMeasure == 
-            UnitOfMeasure.Bag || UnitOfMeasure == UnitOfMeasure.Box || UnitOfMeasure == UnitOfMeasure.Kilogram
-            
-            ))
-            {
-                return Name;
-            }
-
-            return $"{Name} - {UnitSize}{UnitAbbreviation}{PackageType}"; 
-        }
-
-
-        public string UnitPriceDisplay => GetUnitPriceDisplay();
+        // Shows the unit price (e.g "N152.00 for 50kg bag")
+        // </summary>
+        [NotMapped]
+        public string UnitPriceDisplay => $"{CURRENCY_SYMBOL}{UnitPrice:F2} per {MeasurementUnitDisplay}";
 
         // <Summary>
         // Get package price display text (e.g "N152.00 for 50kg bag")
 
-        private string GetUnitPriceDisplay()
-        {
-            var currency = "N"; 
-            return UnitOfMeasure switch
-            {
-                UnitOfMeasure.Kilogram => $"{currency}{Price:F2} per Kg",
-                UnitOfMeasure.Piece => $"{currency}{Price:F2} per piece",
-                UnitOfMeasure.Bag => $"{currency}{Price:F2} per bag",
-                UnitOfMeasure.Box => $"{currency}{Price:F2} per box",
-                _ => $"{currency}{Price:F2} per unit"
-            };
-        }
-
-        [NotMapped]
-        public string PackagePriceDisplay => GetPackagePriceDisplay();
-
-        // <Summary>
-        // Gets complete price display for customers
-
-        private string GetPackagePriceDisplay()
-        {
-            var currency = "N"; 
-            return UnitOfMeasure switch
-            {
-                UnitOfMeasure.Kilogram => $"{currency}{Price:F2} per Kg",
-                UnitOfMeasure.Piece => $"{currency}{Price:F2} per piece",
-                UnitOfMeasure.Bag => $"{currency}{Price:F2} per bag",
-                UnitOfMeasure.Box => $"{currency}{Price:F2} per box",
-                _ => $"{currency}{Price:F2} per unit"
-            };
-        }
-
         [NotMapped]
         public string FullPriceDisplay => GetFullPriceDisplay();
-
-        // <Summary>
-        // Checks if product is currently in stock
-        
         private string GetFullPriceDisplay()
         {
-            if (UnitSize == 1)
-            {
-                return UnitPriceDisplay;
-            }
-
-            return $"{UnitPriceDisplay}({PackagePriceDisplay})";
+           if(IsSingleUnit) return PackagePriceDisplay;
+           return $"{PackagePriceDisplay} ({UnitPriceDisplay})";
         }
 
         [NotMapped]
@@ -176,11 +161,25 @@ namespace Noja.Core.Entity
             if (Quantity == 0)
              return "Out of stock";
             
+            var packageWord = Quantity == 1 ? PackageTypeDisplay : GetPluralPackaging();
             if (Quantity <= 5)
-                return $"Low stock ({Quantity} {(Quantity == 1 ? PackageType : PackageType + "s")} left)";
+                return $"Low stock ({Quantity} {packageWord} available)";
             
-            return $"In stock ({Quantity} {(Quantity == 1 ? PackageType : PackageType + "s")} available)";
+            return $"In stock ({Quantity} {packageWord} left)";
 
+        }
+
+        private string GetPluralPackaging()
+        {
+            return PackageType switch
+            {
+                PackageType.Bag => "bags",
+                PackageType.Box => "boxes",
+                PackageType.Can => "cans",
+                PackageType.Sack => "sacks",
+                PackageType.Carton => "cartons",
+                _ => PackageTypeDisplay + "s"
+            };
         }
 
         [NotMapped]
@@ -202,30 +201,6 @@ namespace Noja.Core.Entity
                 _ => Category.ToString()
             };
         }
-
-        // ======= Utility Methods ======= //
-        // <SUMMARY>
-        // Calculate total price for a given QTY
-        
-        public decimal CalculatePriceForQuantity(decimal requestedQTY)
-        {
-            return Price * requestedQTY;
-        }
-
-        [NotMapped]
-        public bool IsInStock => Quantity > 0 && IsActive;
-
-        // <Summary>
-        // Check if requested qty is available
-
-        public bool IsQTYAvailable(decimal requestedQTY)
-        {
-            if (!IsInStock) return false;
-            var requiredPackages = Math.Ceiling(requestedQTY/UnitSize);
-            return requiredPackages <= Quantity;
-        }
-
-
 
     }
 

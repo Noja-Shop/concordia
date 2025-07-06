@@ -20,20 +20,27 @@ namespace Noja.Application.Models.ProductDTO
 
         [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
-        public decimal Price {get; set;}
+        public decimal PackagePrice {get; set;}
+
+        [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
+        public decimal UnitPrice {get; set;}
+
+        [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Package size must be greater than 0")]
+        public decimal PackageSize {get; set;}
 
         [Required]
         public ProductCategory Category { get; set; }
 
         [Required]
-        public UnitOfMeasure UnitOfMeasure { get; set; }
+        public PackageType PackageType {get; set;}
 
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Unit size must be greater than 0")]
-        public decimal UnitSize {get; set;}
+        public MeasurementUnit MeasurementUnit {get; set;}
 
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
+        [Range(0, double.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
         public int Quantity {get; set;}
         
 

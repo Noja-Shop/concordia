@@ -28,10 +28,12 @@ namespace Noja.Application.Services.Products
                 {
                     Name = createproductDto.Name,
                     Description = createproductDto.Description,
-                    Price = createproductDto.Price,
+                    PackagePrice = createproductDto.PackagePrice,
                     Category = createproductDto.Category,
-                    UnitOfMeasure = createproductDto.UnitOfMeasure,
-                    UnitSize = createproductDto.UnitSize,
+                    UnitPrice = createproductDto.UnitPrice,
+                    PackageSize = createproductDto.PackageSize,
+                    PackageType = createproductDto.PackageType,
+                    MeasurementUnit = createproductDto.MeasurementUnit,
                     Quantity = createproductDto.Quantity,
                     CreatedBy = adminId,
                     IsActive = true,
@@ -283,10 +285,11 @@ namespace Noja.Application.Services.Products
 
             product.Name = updateproductDto.Name;
             product.Description = updateproductDto.Description;
-            product.Price = updateproductDto.Price;
+            product.PackagePrice = updateproductDto.PackagePrice;
+            product.UnitPrice = updateproductDto.UnitPrice;
             product.Category = updateproductDto.Category;
-            product.UnitOfMeasure = updateproductDto.UnitOfMeasure;
-            product.UnitSize = updateproductDto.UnitSize;
+            product.PackageType = updateproductDto.PackageType;
+            product.PackageSize = updateproductDto.PackageSize;
             product.Quantity = updateproductDto.Quantity;
             product.UpdatedAt = DateTime.UtcNow;
 
@@ -365,9 +368,9 @@ namespace Noja.Application.Services.Products
                 Id = product.Id,
                 Name = product.Name,
                 Description = product.Description,
-                Price = product.Price,
+                PackagePrice = product.PackagePrice,
                 Category = product.Category,
-                UnitOfMeasure = product.UnitOfMeasure,
+                PackageType = product.PackageType,
                 Quantity = product.Quantity,
                 IsActive = product.IsActive,
                 UpdatedAt = product.UpdatedAt,
@@ -375,14 +378,14 @@ namespace Noja.Application.Services.Products
                 CreatedAt = product.CreatedAt,
 
                 // Properties to display
-                DisplayName = product.DisplayName,
+                ProductDisplayName = product.ProductDisplayName,
                 UnitPriceDisplay = product.UnitPriceDisplay,
                 PackagePriceDisplay = product.PackagePriceDisplay,
                 FullPriceDisplay = product.FullPriceDisplay,
                 CategoryDisplay = product.CategoryDisplay,
+                PackageTypeDisplay = product.PackageTypeDisplay,
                 IsInStock = product.IsInStock,
                 StockStatusDisplay = product.StockStatusDisplay,
-                UnitAbbreviation = product.UnitAbbreviation
             };
         }
 
@@ -392,10 +395,12 @@ namespace Noja.Application.Services.Products
             {
                 Id = product.Id,
                 Name = product.Name,
-                Price = product.Price,
+                PackagePrice = product.PackagePrice,
+                PackageSize = product.PackageSize,
                 Category = product.Category,
+                MeasurementUnit = product.MeasurementUnit,
                 IsInStock = product.IsInStock,
-                DisplayName = product.DisplayName,
+                ProductDisplayName = product.ProductDisplayName,
                 UnitPriceDisplay = product.UnitPriceDisplay,
                 StockStatusDisplay = product.StockStatusDisplay,
             };
@@ -408,24 +413,24 @@ namespace Noja.Application.Services.Products
                 Id = product.Id,
                 Name = product.Name,
                 Description = product.Description,
-                Price = product.Price,
+                PackagePrice = product.PackagePrice,
                 Category = product.Category,
-                UnitOfMeasure = product.UnitOfMeasure,
-                UnitSize = product.UnitSize,
+                PackageType = product.PackageType,
+                MeasurementUnit = product.MeasurementUnit,
+                UnitPrice = product.UnitPrice,
+                PackageSize = product.PackageSize,
                 Quantity = product.Quantity,
                 IsActive = product.IsActive,
-                CreatedAt = product.CreatedAt,
 
                 // customer display
-                DisplayName = product.DisplayName,
+                ProductDisplayName = product.ProductDisplayName,
                 UnitPriceDisplay = product.UnitPriceDisplay,
                 PackagePriceDisplay = product.PackagePriceDisplay,
                 FullPriceDisplay = product.FullPriceDisplay,
                 StockStatusDisplay = product.StockStatusDisplay,
                 CategoryDisplay = product.CategoryDisplay,
                 IsInStock = product.IsInStock,
-                // PackagePrice = product.PackagePrice,
-                UnitAbbreviation = product.UnitAbbreviation
+                MeasurementUnitDisplay = product.MeasurementUnitDisplay
             };
         }
 

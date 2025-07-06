@@ -36,11 +36,11 @@ namespace Noja.Infrastructure.Data
             {
                 entity.Property(e => e.Category)
                 .HasConversion<string>();
-                entity.Property(e => e.UnitOfMeasure)
+                entity.Property(e => e.PackageType)
                 .HasConversion<string>();
-                entity.Property(e => e.Price)
+                entity.Property(e => e.PackagePrice)
                 .HasColumnType("decimal(18,2)");
-                entity.Property(e => e.UnitSize)
+                entity.Property(e => e.PackageSize)
                 .HasColumnType("decimal(10,2)");
 
                 entity.HasIndex(e => e.Category);
