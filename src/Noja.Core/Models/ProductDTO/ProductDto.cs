@@ -44,7 +44,7 @@ namespace Noja.Application.Models.ProductDTO
         public string StockStatusDisplay { get; set; }
         public string CategoryDisplay { get; set; }
         public string MeasurementUnitDisplay { get; set; }
-        public string PackagingTypeDisplay { get; set; }
+        public string PackageTypeDisplay { get; set; }
         
         // ===== Calculated Properties ===== //
         public bool IsInStock { get; set; }

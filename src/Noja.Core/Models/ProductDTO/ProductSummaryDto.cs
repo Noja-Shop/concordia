@@ -33,6 +33,7 @@ namespace Noja.Application.Models.ProductDTO
         public string FullPriceDisplay { get; set; }
         public string StockStatusDisplay { get; set; }
         public string CategoryDisplay { get; set; }
+        public string PackageTypeDisplay {get; set;}
         
         /// <summary>
         /// For product card badges (e.g., "50kg", "1.5L", "Single")

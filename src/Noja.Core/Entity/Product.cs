@@ -53,6 +53,27 @@ namespace Noja.Core.Entity
        [Required]
        public PackageType PackageType {get; set;}
 
+
+       // <summary>
+       // Number of sub-containers in main package
+       // eg 4 buckets in a basket
+       // </summary>
+       [Range(1, int.MaxValue,ErrorMessage = "Conatiner must be at least 1")]
+       [Column(TypeName = "int")]
+       public int ContainerCount {get; set; } = 1;
+
+        // <summary>
+        // Type of container. eg, basket, box, etc
+        // </summary>
+       public ContainerType ContainerType {get; set;} = ContainerType.None;
+
+        // <summary>
+        // Size of container. eg, 15Kg per bucket
+        // </summary>
+        [Range(0.01, double.MaxValue, ErrorMessage = "Container size must be greater than 0")]
+        [Column(TypeName = "decimal(10,3)")]
+        public decimal ContainerSize {get; set;} = 0;
+
         [Required]
         public int Quantity {get; set;} // Available stock in number
         public bool IsActive {get; set;}
@@ -108,6 +129,7 @@ namespace Noja.Core.Entity
                 PackageType.Box => "box",
                 PackageType.Can => "can",
                 PackageType.Sack => "sack",
+                PackageType.Jar => "jar",
                 PackageType.Carton => "carton",
                 _ => "package"
             };
@@ -201,6 +223,53 @@ namespace Noja.Core.Entity
                 _ => Category.ToString()
             };
         }
+
+        // ======== Container Display/Properties ======== //
+        [NotMapped]
+        public bool HasContainers => ContainerCount > 1 && ContainerType != ContainerType.None;
+
+        [NotMapped]
+        public string ContainerTypeDisplay => GetContainerTypeDisplay();
+
+        private string GetContainerTypeDisplay()
+        {
+            return ContainerType switch
+            {
+                ContainerType.None => "",
+                ContainerType.Bucket => "bucket",
+                ContainerType.Sachet => "sachet",
+                ContainerType.Pack => "pack",
+                _ => "conatiner"
+            };
+        }  
+
+        [NotMapped]
+        public string ContainerDescription => GetContainerDescription();
+
+        private string GetContainerDescription()
+        {
+            if(!HasContainers) return "";
+
+            var containerWord = ContainerCount == 1 ? ContainerTypeDisplay : GetPluralContainer();
+
+            if (ContainerSize > 0)
+            {
+                return $"{ContainerCount} {containerWord} of {ContainerSize:G29} {MeasurementUnitDisplay} each";
+            }
+
+            return $"{ContainerCount} {containerWord}";
+        } 
+
+        private string GetPluralContainer()
+        {
+            return ContainerType switch
+            {
+                ContainerType.Bucket => "buckets",
+                ContainerType.Sachet => "sachets",
+                ContainerType.Pack => "packs",
+                _ => "conatiners"
+            };
+        }  
 
     }
 
