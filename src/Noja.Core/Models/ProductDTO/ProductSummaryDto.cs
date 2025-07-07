@@ -11,28 +11,30 @@ namespace Noja.Application.Models.ProductDTO
         public Guid Id { get; set; }
         public string Name { get; set; }
         
-        // ===== Pricing  ===== //
         public decimal PackagePrice { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal PackageSize { get; set; }
+        public int ContainerCount {get; set;}
+        public decimal ContainerSize {get; set;}
         
-        // ===== Product Classification ===== //
         public ProductCategory Category { get; set; }
         public MeasurementUnit MeasurementUnit { get; set; }
         public PackageType PackageType { get; set; }
+        public ContainerType ContainerType {get; set;}
         
-        // ===== Stock Status ===== //
+        
         public bool IsInStock { get; set; }
         public bool IsActive { get; set; }
-        public int Quantity { get; set; } // Useful for "Only X left" messages
-        
-        // ===== Essential Display Properties for Product Cards ===== //
+        public int Quantity { get; set; } 
+
         public string ProductDisplayName { get; set; }
         public string PackagePriceDisplay { get; set; }
         public string UnitPriceDisplay { get; set; }
         public string FullPriceDisplay { get; set; }
         public string StockStatusDisplay { get; set; }
         public string CategoryDisplay { get; set; }
+        public string ContainerTypeDisplay {get; set;}
+        public string ContainerDescription {get; set;}
         public string PackageTypeDisplay {get; set;}
         
         /// <summary>

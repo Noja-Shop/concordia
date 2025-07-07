@@ -31,9 +31,12 @@ namespace Noja.Application.Services.Products
                     PackagePrice = createproductDto.PackagePrice,
                     Category = createproductDto.Category,
                     UnitPrice = createproductDto.UnitPrice,
+                    ContainerSize = createproductDto.ContainerSize,
                     PackageSize = createproductDto.PackageSize,
                     PackageType = createproductDto.PackageType,
+                    ContainerType = createproductDto.ContainerType,
                     MeasurementUnit = createproductDto.MeasurementUnit,
+                    ContainerCount = createproductDto.ContainerCount,
                     Quantity = createproductDto.Quantity,
                     CreatedBy = adminId,
                     IsActive = true,
@@ -288,6 +291,9 @@ namespace Noja.Application.Services.Products
             product.PackagePrice = updateproductDto.PackagePrice;
             product.UnitPrice = updateproductDto.UnitPrice;
             product.Category = updateproductDto.Category;
+            product.ContainerCount = updateproductDto.ContainerCount;
+            product.ContainerType = updateproductDto.ContainerType;
+            product.ContainerSize = updateproductDto.ContainerSize;
             product.PackageType = updateproductDto.PackageType;
             product.PackageSize = updateproductDto.PackageSize;
             product.Quantity = updateproductDto.Quantity;
@@ -371,6 +377,8 @@ namespace Noja.Application.Services.Products
                 PackagePrice = product.PackagePrice,
                 Category = product.Category,
                 PackageType = product.PackageType,
+                ContainerCount = product.ContainerCount,
+                ContainerSize = product.ContainerSize,
                 Quantity = product.Quantity,
                 IsActive = product.IsActive,
                 UpdatedAt = product.UpdatedAt,
@@ -382,6 +390,8 @@ namespace Noja.Application.Services.Products
                 UnitPriceDisplay = product.UnitPriceDisplay,
                 PackagePriceDisplay = product.PackagePriceDisplay,
                 FullPriceDisplay = product.FullPriceDisplay,
+                ContainerTypeDisplay = product.ContainerTypeDisplay,
+                ContainerDescription = product.ContainerDescription,
                 CategoryDisplay = product.CategoryDisplay,
                 PackageTypeDisplay = product.PackageTypeDisplay,
                 IsInStock = product.IsInStock,
@@ -397,10 +407,14 @@ namespace Noja.Application.Services.Products
                 Name = product.Name,
                 PackagePrice = product.PackagePrice,
                 PackageSize = product.PackageSize,
+                ContainerCount = product.ContainerCount,
                 Category = product.Category,
                 MeasurementUnit = product.MeasurementUnit,
+                ContainerSize = product.ContainerSize,
                 IsInStock = product.IsInStock,
                 ProductDisplayName = product.ProductDisplayName,
+                ContainerTypeDisplay = product.ContainerTypeDisplay,
+                ContainerDescription = product.ContainerDescription,
                 UnitPriceDisplay = product.UnitPriceDisplay,
                 StockStatusDisplay = product.StockStatusDisplay,
             };
@@ -416,7 +430,9 @@ namespace Noja.Application.Services.Products
                 PackagePrice = product.PackagePrice,
                 Category = product.Category,
                 PackageType = product.PackageType,
+                ContainerType = product.ContainerType,
                 MeasurementUnit = product.MeasurementUnit,
+                ContainerSize = product.ContainerSize,
                 UnitPrice = product.UnitPrice,
                 PackageSize = product.PackageSize,
                 Quantity = product.Quantity,
@@ -426,7 +442,9 @@ namespace Noja.Application.Services.Products
                 ProductDisplayName = product.ProductDisplayName,
                 UnitPriceDisplay = product.UnitPriceDisplay,
                 PackagePriceDisplay = product.PackagePriceDisplay,
+                ContainerTypeDisplay = product.ContainerTypeDisplay,
                 FullPriceDisplay = product.FullPriceDisplay,
+                ContainerDescription = product.ContainerDescription,
                 StockStatusDisplay = product.StockStatusDisplay,
                 CategoryDisplay = product.CategoryDisplay,
                 IsInStock = product.IsInStock,

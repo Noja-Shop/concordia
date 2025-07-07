@@ -29,7 +29,9 @@ namespace Noja.Application.Models.ProductDTO
         /// Size of one package (e.g., 50 for 50kg bag)
         /// </summary>
         public decimal PackageSize { get; set; }
-        
+        public int ContainerCount {get; set;}
+        public decimal ContainerSize {get; set;}
+        public ContainerType ContainerType {get; set;}
         public ProductCategory Category { get; set; }
         public MeasurementUnit MeasurementUnit { get; set; }
         public PackageType PackageType { get; set; }
@@ -46,6 +48,8 @@ namespace Noja.Application.Models.ProductDTO
         public string PackagePriceDisplay { get; set; }
         public string UnitPriceDisplay { get; set; }
         public string FullPriceDisplay { get; set; }
+        public string ContainerTypeDisplay {get; set;}
+        public string ContainerDescription {get; set;}
         public string StockStatusDisplay { get; set; }
         public string CategoryDisplay { get; set; }
         public string MeasurementUnitDisplay { get; set; }

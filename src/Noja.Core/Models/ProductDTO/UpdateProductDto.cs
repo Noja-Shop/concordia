@@ -38,6 +38,15 @@ namespace Noja.Application.Models.ProductDTO
         public PackageType PackageType { get; set; }
 
         [Required]
+        public int ContainerCount {get; set;}
+
+        [Required]
+        public ContainerType ContainerType {get; set;}
+
+        [Required]
+        public decimal ContainerSize {get; set;}
+
+        [Required]
         [Range(0, double.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
         public int Quantity {get; set;}
 
