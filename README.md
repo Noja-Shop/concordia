@@ -69,7 +69,7 @@ create a postgresql database createdb NojaDB
 }
 
 4. Run Migrations
-dotnet ef migrations add [named_migration] --project ../Noja.Infrastructure --startup-project ../Noja.API
+dotnet ef migrations add [named_migration] -p ../Noja.Infrastructure -s ../Noja.API (make sure that you're in the Noja.API)
 
 dotnet ef database update
 
