@@ -431,6 +431,7 @@ namespace Noja.Application.Services.Products
                 Category = product.Category,
                 PackageType = product.PackageType,
                 ContainerType = product.ContainerType,
+                ContainerCount = product.ContainerCount,
                 MeasurementUnit = product.MeasurementUnit,
                 ContainerSize = product.ContainerSize,
                 UnitPrice = product.UnitPrice,

@@ -42,7 +42,17 @@ namespace Noja.Infrastructure.Data
                 .HasColumnType("decimal(18,2)");
                 entity.Property(e => e.PackageSize)
                 .HasColumnType("decimal(10,2)");
-
+                entity.Property(e => e.UnitPrice)
+                .HasColumnType("decimal(10,2)");
+                entity.Property(e => e.ContainerSize)
+                .HasColumnType("decimal(10,3)");
+                entity.Property(e => e.ContainerType)
+                .HasConversion<string>();
+                entity.Property(e => e.MeasurementUnit)
+                .HasConversion<string>();
+                entity.Property(e => e.ContainerCount)
+                .HasColumnType("int")
+                .HasDefaultValue(1);
                 entity.HasIndex(e => e.Category);
                 entity.HasIndex(e => e.IsActive);
                 entity.HasIndex(e => new { e.Category, e.IsActive 
