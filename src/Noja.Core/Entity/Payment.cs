@@ -11,7 +11,7 @@ namespace Noja.Core.Entity
     public class Payment
     {
         [Key]
-        public Guid Id = Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
         public string CustomerId { get; set; }
@@ -20,7 +20,7 @@ namespace Noja.Core.Entity
         public Customer Customer { get; set; }
 
         [Required]
-        public string TeamId { get; set; }
+        public Guid TeamId { get; set; }
 
         [ForeignKey("TeamId")]
         public Team Team { get; set; }
