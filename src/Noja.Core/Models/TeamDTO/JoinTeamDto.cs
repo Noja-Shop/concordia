@@ -14,7 +14,7 @@ namespace Noja.Core.Models.TeamDTO
 
         [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "Qty must be greater than 0")]
-        public decimal Quntity { get; set; }
+        public decimal Quantity { get; set; }
 
         [Required]
         public PaymentMethod PaymentMethod {get; set;}
