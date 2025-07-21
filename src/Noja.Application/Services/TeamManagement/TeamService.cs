@@ -1,0 +1,497 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Noja.Application.Models.Common;
+using Noja.Application.Models.ProductDTO;
+using Noja.Application.Services.TeamManagement.Interface;
+using Noja.Core.Entity;
+using Noja.Core.Enums.Team;
+using Noja.Core.Interfaces.Repository;
+using Noja.Core.Interfaces.Repository.Teams;
+using Noja.Core.Models.TeamDTO;
+
+namespace Noja.Application.Services.TeamManagement
+{
+    public class TeamService : ITeamService
+    {
+
+        private readonly ITeamRepository _teamRepository;
+        private readonly ITeamMemberRepository _memberRepository;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPaymentService _paymentService;
+        private readonly IProductRepository _productRepository;
+
+        public TeamService(ITeamRepository teamRepository,
+            ITeamMemberRepository memberRepository,
+            IPaymentRepository paymentRepository,
+            IPaymentService paymentService,
+            IProductRepository productRepository)
+        {
+            _teamRepository = teamRepository;
+            _memberRepository = memberRepository;
+            _paymentRepository = paymentRepository;
+            _paymentService = paymentService;
+            _productRepository = productRepository;
+        }
+        public async Task<ServiceResponse<TeamDto>> CreateTeamAsync(string customerId, CreateTeamDto createTeamDto)
+        {
+            var response = new ServiceResponse<TeamDto>();
+            try
+            {
+                if (createTeamDto == null)
+                {
+                    response.Success = false;
+                    response.Message = "Team creation data is required";
+                    return response;
+                }
+                if (string.IsNullOrEmpty(customerId))
+                {
+                    response.Success = false;
+                    response.Message = "Customer ID is required";
+                    return response;
+                }
+
+                var product = await _productRepository.GetProductById(createTeamDto.ProductId);
+                if (product == null)
+                {
+                    response.Success = false;
+                    response.Message = "Product not found";
+                    return response;
+                }
+
+                if (!product.IsActive || !product.IsInStock)
+                {
+                    response.Success = false;
+                    response.Message = "Product is not available for team creation";
+                    return response;
+                }
+
+                if (createTeamDto.CreatorQuantity > createTeamDto.TargetQuantity)
+                {
+                    response.Success = false;
+                    response.Message = "Creator's quantity cannot be greater than target quantity";
+                    return response;
+                }
+
+                // Team calculation: calculate amounts
+                var unitPrice = product.UnitPrice;
+                var targetAmount = createTeamDto.TargetQuantity * unitPrice;
+                var creatorAmount = createTeamDto.CreatorQuantity * unitPrice;
+
+                // 1. create payment for team creator
+                var paymentResponse = await _paymentService.CreatePaymentAsync
+                (
+                    customerId,
+                    Guid.Empty,
+                    creatorAmount,
+                    createTeamDto.PaymentMethod,
+                    createTeamDto.SimulatePaymentSuccess
+                );
+
+                if (!paymentResponse.Success)
+                {
+                    response.Success = false;
+                    response.Message = $"Failed to create: {paymentResponse.Message}";
+                    return response;
+                }
+
+                var creatorPayment = paymentResponse.Data;
+
+                // 2. create team entity
+                var team = new Team
+                {
+                    Name = createTeamDto.Name,
+                    Description = createTeamDto.Description,
+                    ProductId = createTeamDto.ProductId,
+                    TargetQuantity = createTeamDto.TargetQuantity,
+                    TargetAmount = targetAmount,
+                    UnitPrice = unitPrice,
+                    MinParticipants = createTeamDto.MinParticipants,
+                    Status = TeamStatus.Active
+                };
+
+                // Initialize expiry (from now up to 72 hrs)
+                team.InitializeExpiry();
+
+                // save team to the database
+                var createdTeam = await _teamRepository.CreateAsync(team);
+
+                // 3. update payment with team ID
+                creatorPayment.TeamId = createdTeam.Id;
+
+                // Payment update would need to be implemented in PaymentService
+
+                // 4. Process the creator's payment
+                var paymentProcessResponse = await _paymentService.ProcessPaymentAsync(creatorPayment);
+
+                if (!paymentProcessResponse.Success)
+                {
+                    // delete team if payment processing fails
+                    // in production use database transation
+                    response.Success = false;
+                    response.Message = $"Payment processing failed: {paymentProcessResponse.Message}";
+                    return response;
+                }
+
+                // 5. create team member for creator
+                var creatorMember = new TeamMember
+                {
+                    TeamId = createdTeam.Id,
+                    CustomerId = customerId,
+                    Quantity = createTeamDto.CreatorQuantity,
+                    AmountPaid = creatorAmount,
+                    PaymentId = creatorPayment.Id
+                };
+
+
+                var createdMember = await _memberRepository.CreateAsync(creatorMember);
+
+                // 6. Get compete team with members for response
+                var teamComplete = await _teamRepository.GetByIdWithMemberAsync(createdTeam.Id);
+
+                // 7. map to dto and return
+                response.Success = true;
+                response.Message = "Team created successfully";
+                response.Data = MapToTeamDto(teamComplete);
+                return response;
+
+
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = "An error occurred while creating the team: " + ex.Message;
+                return response;
+            }
+        }
+
+        public async Task<ServiceResponse<List<TeamDto>>> GetTeamByProductAsync(Guid productId)
+        {
+            var response = new ServiceResponse<List<TeamDto>>();
+
+            try
+            {
+                // get all teams for product
+                var teams = await _teamRepository.GetTeamsByProductAsync(productId);
+
+                if (teams == null || !teams.Any())
+                {
+                    response.Success = false;
+                    response.Message = "No teams found for this product";
+                    return response;
+                }
+
+                // map to dto
+                response.Success = true;
+                response.Message = "Teams retrieved successfully";
+                response.Data = teams.Select(MapToTeamDto).ToList();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error retrieving teams: {ex.Message}";
+                return response;
+            }
+        }
+
+        public async Task<ServiceResponse<TeamDto>> GetTeamDetailsAsync(Guid teamId)
+        {
+
+            var response = new ServiceResponse<TeamDto>();
+
+            try
+            {
+                // get team with all members
+                var team = await _teamRepository.GetByIdWithMemberAsync(teamId);
+
+                if (team == null)
+                {
+                    response.Success = false;
+                    response.Message = $"Team is not found";
+                    return response;
+                }
+
+                // map to dto with all details
+                response.Success = true;
+                response.Message = "Details retrieved successfully";
+                response.Data = MapToTeamDto(team);
+                return response;
+            }
+
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error retriving {ex.Message}";
+                return response;
+            }
+        }
+
+        public async Task<ServiceResponse<TeamDto>> GetTeamDetailsWithMembersAsync(Guid teamId)
+        {
+            var response = new ServiceResponse<TeamDto>();
+
+            try
+            {
+                // get team with all members
+                var team = await _teamRepository.GetByIdWithMemberAsync(teamId);
+
+                if (team == null)
+                {
+                    response.Success = false;
+                    response.Message = "Team not found";
+                    return response;
+                }
+
+                // map to dto with all details
+                response.Success = true;
+                response.Message = "Team details retrieved successfully";
+                response.Data = MapToTeamDto(team);
+                return response;
+            }
+
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error retrieving team details: {ex.Message}";
+                return response;
+            }
+        }
+
+        public async Task<ServiceResponse<List<TeamDto>>> GetTeamsByCustomerAsync(string customerId)
+        {
+            var response = new ServiceResponse<List<TeamDto>>();
+            try
+            {
+                if (string.IsNullOrEmpty(customerId))
+                {
+                    response.Success = false;
+                    response.Message = "Customer ID is required";
+                    return response;
+                }
+
+                // get teams created by customer
+                var teams = await _teamRepository.GetTeamsByCreatorAsync(customerId);
+
+                if (teams == null || !teams.Any())
+                {
+                    response.Success = false;
+                    response.Message = "No teams found for this customer";
+                    return response;
+                }
+
+                // map to dto
+                response.Success = true;
+                response.Message = "Teams retrieved successfully";
+                response.Data = teams.Select(MapToTeamDto).ToList();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error retrieving teams: {ex.Message}";
+                return response;
+            }
+        }
+
+        public async Task<ServiceResponse<TeamMemberDto>> JoinTeamAsync(string customerId, JoinTeamDto joinTeamDto)
+        {
+            var response = new ServiceResponse<TeamMemberDto>();
+
+            try
+            {
+                if (joinTeamDto == null)
+                {
+                    response.Success = false;
+                    response.Message = "Join team data is required";
+                    return response;
+                }
+
+                // Team validation: Get team with current members
+                var team = await _teamRepository.GetByIdWithMemberAsync(joinTeamDto.TeamId);
+
+                if (team == null)
+                {
+                    response.Success = false;
+                    response.Message = "Team not found";
+                    return response;
+                }
+
+                // Team validation: check if team is joinable
+                var canJoin = team.CanMemberJoin(joinTeamDto.Quantity, out string reason);
+
+                if (!canJoin)
+                {
+                    response.Success = false;
+                    response.Message = reason;
+                    return response;
+                }
+
+                // Team validation: check if customer already member
+                var existingMember = await _memberRepository.GetByTeamAndCustomerAsync(joinTeamDto.TeamId, customerId);
+
+                if (existingMember != null)
+                {
+                    response.Success = false;
+                    response.Message = "You're already a member";
+                    return response;
+                }
+
+                // Team validation: calculate payment amount
+                var paymentAmount = joinTeamDto.Quantity * team.UnitPrice;
+
+                // 1. create payment for joining member
+                var paymentResponse = await _paymentService.CreatePaymentAsync
+                (
+                    customerId,
+                    joinTeamDto.TeamId,
+                    paymentAmount,
+                    joinTeamDto.PaymentMethod,
+                    joinTeamDto.SimulatedPaymentSuccess
+                );
+
+                if (!paymentResponse.Success)
+                {
+                    response.Success = false;
+                    response.Message = $"Failed to create payment: {paymentResponse.Message}";
+                    return response;
+                }
+
+                var payment = paymentResponse.Data;
+
+                // 2. Process payment
+                var paymentProcessResponse = await _paymentService.ProcessPaymentAsync(payment);
+
+                if (!paymentProcessResponse.Success)
+                {
+                    response.Success = false;
+                    response.Message = $"Payment process failed {paymentProcessResponse.Message}";
+                    return response;
+                }
+
+                // 3. create team member, the joiner
+
+                var teamMember = new TeamMember
+                {
+                    TeamId = joinTeamDto.TeamId,
+                    CustomerId = customerId,
+                    Quantity = joinTeamDto.Quantity,
+                    AmountPaid = paymentAmount,
+                    PaymentId = payment.Id
+                };
+
+                var createdMember = await _memberRepository.CreateAsync(teamMember);
+
+                // 4. check if team targets are reached
+                var memberCount = await _memberRepository.GetTeamMemberCountAsync(joinTeamDto.TeamId);
+                var totalPaid = await _memberRepository.GetTeamTotalPaidAsync(joinTeamDto.TeamId);
+                var totalCommited = await _memberRepository.GetTeamTotalCommittedAsync(joinTeamDto.TeamId);
+
+                // update team status if targets reached
+                team.CheckAndUpdateStatus();
+
+                response.Success = true;
+                response.Message = "Successfully joined team";
+                response.Data = MapToTeamMemberDto(createdMember);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error joining team: {ex.Message}";
+                return response;
+            }
+        }
+    
+
+    /// ==== Mapping methods: Data transfer objects ==== ///
+    
+    private static TeamDto MapToTeamDto(Team team)
+        {
+            return new TeamDto
+            {
+                Id = team.Id,
+                Name = team.Name,
+                ProductId = team.ProductId,
+                Description = team.Description,
+                TargetQuantity = team.TargetQuantity,
+                TargetAmount = team.TargetAmount,
+                CreatedBy = team.CreatedBy,
+                MinParticipants = team.MinParticipants,
+                Status = team.Status,
+                CompletedAt = team.CompletedAt,
+                ExpiresAt = team.ExpiresAt,
+                // ==============================//
+                Product = team.Product != null ? MapToProductSummaryDto(team.Product) : null,
+            
+
+                // =============Calculated properties=================//
+                IsExpired = team.IsExpired,
+                CountdownDisplay = team.CountdownDisplay,
+                UrgencyLevel = team.UrgencyLevel,
+                StatusDisplay = team.StatusDisplay,
+                ProgressDisplay = team.ProgressDisplay,
+                TotalCommitted = team.TotalCommitted,
+                TotalPaid = team.TotalPaid,
+                RemainingQuantity = team.RemainingQuantity,
+                RemainingAmount = team.RemainingAmount,
+                ProgressPercentage = team.ProgressPercentage,
+                QuantityProgressPercentage = team.QuantityProgressPercentage,
+
+                // ==================Team logic=====================//
+                IsTargetReached = team.IsTargetReached,
+                IsAmountTargetReached = team.IsAmountTargetReached,
+                IsQuantityTargetReached = team.IsQuantityTargetReached,
+                CanJoin = team.CanJoin,
+                Members = team.Members.Select(MapToTeamMemberDto).ToList()
+
+            };
+        }
+
+        private static TeamMemberDto MapToTeamMemberDto(TeamMember member)
+        {
+            return new TeamMemberDto
+            {
+                Id = member.Id,
+                CustomerId = member.CustomerId,
+                Quantity = member.Quantity,
+                AmountPaid = member.AmountPaid,
+                TeamId = member.TeamId,
+                PaymentId = member.PaymentId,
+                CommitmentDisplay = member.CommitmentDisplay
+            };
+        }
+
+        private static ProductSummaryDto MapToProductSummaryDto(Product product)
+        {
+            return new ProductSummaryDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                PackagePrice = product.PackagePrice,
+                UnitPrice = product.UnitPrice,
+                PackageSize = product.PackageSize,
+                ContainerCount = product.ContainerCount,
+                ContainerSize = product.ContainerSize,
+                Category = product.Category,
+                MeasurementUnit = product.MeasurementUnit,
+                PackageType = product.PackageType,
+                ContainerType = product.ContainerType,
+                IsInStock = product.IsInStock,
+                IsActive = product.IsActive,
+                Quantity = product.Quantity,
+                ProductDisplayName = product.ProductDisplayName,
+                PackagePriceDisplay = product.PackagePriceDisplay,
+                UnitPriceDisplay = product.UnitPriceDisplay,
+                FullPriceDisplay = product.FullPriceDisplay,
+                StockStatusDisplay = product.StockStatusDisplay,
+                CategoryDisplay = product.CategoryDisplay,
+                ContainerTypeDisplay = product.ContainerTypeDisplay,
+                ContainerDescription = product.ContainerDescription,
+                PackageTypeDisplay = product.PackageTypeDisplay,
+
+            };
+        }
+    } 
+}
