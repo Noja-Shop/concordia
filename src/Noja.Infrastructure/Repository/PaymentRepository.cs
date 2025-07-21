@@ -157,5 +157,27 @@ namespace Noja.Infrastructure.Repository
                 throw new Exception("An error occurred while retrieving payments by team.", ex);
             }
         }
+
+        public async Task<Payment> UpdateAsync(Payment payment)
+        {
+            try
+            {
+                if (payment == null)
+                {
+                    throw new ArgumentNullException(nameof(payment), "Payment cannot be null");
+                }
+
+                // Update the payment entity
+                _context.Payments.Update(payment);
+                await _context.SaveChangesAsync();
+                
+                return payment;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                throw new Exception("An error occurred while updating the payment.", ex);
+            }
+        }
     }
 }

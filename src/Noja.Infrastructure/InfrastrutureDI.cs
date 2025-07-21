@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Noja.Core.Entity;
 using Noja.Core.Interfaces.Repository;
+using Noja.Core.Interfaces.Repository.Teams;
 using Noja.Infrastructure.Authentication;
 using Noja.Infrastructure.Data;
 using Noja.Infrastructure.Options;
@@ -50,6 +51,11 @@ namespace Noja.Infrastructure
 
             services.AddScoped<ITokenService, JwtTokenGenerator>();
             services.AddScoped<IProductRepository, ProductRepository>();
+
+            /// ====== team management services ====== ///
+            services.AddScoped<ITeamRepository, TeamRepository>();
+            services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
 
             return services;
         }

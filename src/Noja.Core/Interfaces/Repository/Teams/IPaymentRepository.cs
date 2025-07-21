@@ -39,6 +39,8 @@ namespace Noja.Core.Interfaces.Repository.Teams
         // Get all payments based on status
         // </summary>
         Task<IEnumerable<Payment>> GetByStatusAsync(PaymentStatus status);
+
+        Task<Payment> UpdateAsync(Payment payment);
         
           
     }

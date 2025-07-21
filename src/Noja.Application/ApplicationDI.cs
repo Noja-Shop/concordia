@@ -7,6 +7,8 @@ using Noja.Application.Services.Admin;
 using Noja.Application.Services.Admin.Interface;
 using Noja.Application.Services.Auth;
 using Noja.Application.Services.Products;
+using Noja.Application.Services.TeamManagement;
+using Noja.Application.Services.TeamManagement.Interface;
 using Noja.Core.Interfaces.Service;
 
 
@@ -22,6 +24,9 @@ namespace Noja.Application
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IProductService, ProductService>();
+
+            // ====== team management services ====== //
+            services.AddScoped<ITeamService, TeamService>();
 
             return services;
         }
