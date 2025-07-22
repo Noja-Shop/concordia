@@ -14,7 +14,7 @@ namespace Noja.Application.Services.TeamManagement.Interface
     // </summary>
     public interface ITeamService
     {
-        /// BUSINESS RULES:
+        /// TEAM RULE:
         /// - Creator must specify their own quantity (can't create empty team)
         /// - Target quantity must be greater than creator's quantity
         /// - Product must be available and active
@@ -30,7 +30,7 @@ namespace Noja.Application.Services.TeamManagement.Interface
         // </summary>
         Task<ServiceResponse<TeamDto>> CreateTeamAsync(string customerId, CreateTeamDto createTeamDto);
 
-        /// BUSINESS RULES:
+        /// TEAM RULES:
         /// - Customer can only join each team once
         /// - Team must be active (not expired, cancelled, or completed)
         /// - Requested quantity + current committed ≤ target quantity
@@ -90,7 +90,7 @@ namespace Noja.Application.Services.TeamManagement.Interface
         /// USE CASE: Product details page, product-specific team listings
         /// USE CASE: Product details page showing "3 teams buying this product"
         /// 
-        /// BUSINESS VALUE:
+        /// TEAM VALUE:
         /// - Helps customers find teams for products they want
         /// - Shows product popularity
         /// - Enables customers to compare team options for same product

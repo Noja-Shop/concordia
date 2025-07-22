@@ -137,7 +137,6 @@ namespace Noja.Application.Services.TeamManagement
                     PaymentId = creatorPayment.Id
                 };
 
-
                 var createdMember = await _memberRepository.CreateAsync(creatorMember);
 
                 // 6. Get compete team with members for response
@@ -148,8 +147,6 @@ namespace Noja.Application.Services.TeamManagement
                 response.Message = "Team created successfully";
                 response.Data = MapToTeamDto(teamComplete);
                 return response;
-
-
             }
             catch (Exception ex)
             {
