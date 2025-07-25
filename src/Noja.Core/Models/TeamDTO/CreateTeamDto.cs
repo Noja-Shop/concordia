@@ -27,8 +27,8 @@ namespace Noja.Core.Models.TeamDTO
         [Range(0.01, double.MaxValue, ErrorMessage = "Creator quantity must be greater than 0")]
         public decimal CreatorQuantity { get; set; }
 
-        [Range(2, 50, ErrorMessage = "Minimum participants must be between 2 and 50")]
-        public int MinParticipants { get; set; } = 2;
+        // [Range(2, 50, ErrorMessage = "Minimum participants must be between 2 and 50")]
+        // public int MinParticipants { get; set; } = 2;
 
         [Required]
         public PaymentMethod PaymentMethod { get; set; }

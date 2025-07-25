@@ -56,8 +56,8 @@ namespace Noja.Core.Entity
         [Required]
         public DateTime ExpiresAt { get; set; }
 
-        [Range(2, 50)]
-        public int MinParticipants { get; set; } = 2;
+        // [Range(2, 50)]
+        // public int MinParticipants { get; set; } = 2;
 
         // Participants (including Creator)
         public ICollection<TeamMember> Members { get; set; } = new List<TeamMember>();
@@ -68,16 +68,16 @@ namespace Noja.Core.Entity
         // ===== success criteria ====== //
 
         [NotMapped]
-        public bool IsQuantityTargetReached => TotalCommitted >= TargetQuantity;
+        public bool IsQuantityTargetReached => TotalCommitted == TargetQuantity;
 
         [NotMapped]
-        public bool IsAmountTargetReached => TotalPaid >= TargetAmount;
+        public bool IsAmountTargetReached => TotalPaid == TargetAmount;
+
+        // [NotMapped]
+        // public bool HasMinParticipants => CurrentParticipants >= MinParticipants;
 
         [NotMapped]
-        public bool HasMinParticipants => CurrentParticipants >= MinParticipants;
-
-        [NotMapped]
-        public bool IsSuccessful => IsQuantityTargetReached && IsAmountTargetReached && HasMinParticipants;
+        public bool IsSuccessful => IsQuantityTargetReached && IsAmountTargetReached;
 
         // ===== Expiry properties =======//
 
@@ -202,9 +202,9 @@ namespace Noja.Core.Entity
             var amountProgress = $"₦{TotalPaid:N2} of ₦{TargetAmount:N2}";
             var amountPercent = ProgressPercentage;
             var quantityPercent = QuantityProgressPercentage;
-            var participantCount = $"{CurrentParticipants} members";
+            // var participantCount = $"{CurrentParticipants} members";
             
-            return $"{quantityProgress} ({quantityPercent:F1}%) | {amountProgress} ({amountPercent:F1}%) | {participantCount}";
+            return $"{quantityProgress} ({quantityPercent:F1}%) | {amountProgress} ({amountPercent:F1}%)";
         }
 
         [NotMapped]

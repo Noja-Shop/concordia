@@ -94,13 +94,14 @@ namespace Noja.Application.Services.TeamManagement
                 // 2. create team entity
                 var team = new Team
                 {
-                    Name = createTeamDto.Name,
+                    Name = createTeamDto.Name?.Trim() ?? $"{product.Name}",
                     Description = createTeamDto.Description,
+                    Product = product,
                     ProductId = createTeamDto.ProductId,
                     TargetQuantity = createTeamDto.TargetQuantity,
                     TargetAmount = targetAmount,
                     UnitPrice = unitPrice,
-                    MinParticipants = createTeamDto.MinParticipants,
+                    // MinParticipants = createTeamDto.MinParticipants,
                     Status = TeamStatus.Active
                 };
 
@@ -405,7 +406,7 @@ namespace Noja.Application.Services.TeamManagement
                 TargetQuantity = team.TargetQuantity,
                 TargetAmount = team.TargetAmount,
                 CreatedBy = team.CreatedBy,
-                MinParticipants = team.MinParticipants,
+                // MinParticipants = team.MinParticipants,
                 Status = team.Status,
                 CompletedAt = team.CompletedAt,
                 ExpiresAt = team.ExpiresAt,
