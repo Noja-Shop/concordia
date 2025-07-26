@@ -9,7 +9,6 @@ namespace Noja.Core.Models.TeamDTO
     public class PaymentDto
     {
         public Guid id { get; set; }
-
         public string CustomerId { get; set; }
         public Guid TeamId { get; set; }
         public string CustomerName { get; set; }

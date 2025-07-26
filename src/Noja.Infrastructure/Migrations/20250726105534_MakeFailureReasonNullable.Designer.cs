@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Noja.Infrastructure.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Noja.Infrastructure.Migrations
 {
     [DbContext(typeof(NojaDbContext))]
-    partial class NojaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250726105534_MakeFailureReasonNullable")]
+    partial class MakeFailureReasonNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -152,43 +155,6 @@ namespace Noja.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("Noja.Core.Entity.Contribution", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("PaymentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Quantity")
-                        .HasColumnType("numeric");
-
-                    b.Property<Guid>("TeamId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("PaymentId")
-                        .IsUnique();
-
-                    b.HasIndex("TeamId");
-
-                    b.ToTable("Contributions");
                 });
 
             modelBuilder.Entity("Noja.Core.Entity.NojaUser", b =>
@@ -600,31 +566,6 @@ namespace Noja.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Noja.Core.Entity.Contribution", b =>
-                {
-                    b.HasOne("Noja.Core.Entity.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Noja.Core.Entity.Payment", "Payment")
-                        .WithOne("Contribution")
-                        .HasForeignKey("Noja.Core.Entity.Contribution", "PaymentId");
-
-                    b.HasOne("Noja.Core.Entity.Team", "Team")
-                        .WithMany("Contributions")
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("Payment");
-
-                    b.Navigation("Team");
-                });
-
             modelBuilder.Entity("Noja.Core.Entity.Payment", b =>
                 {
                     b.HasOne("Noja.Core.Entity.Customer", "Customer")
@@ -701,16 +642,8 @@ namespace Noja.Infrastructure.Migrations
                     b.Navigation("Team");
                 });
 
-            modelBuilder.Entity("Noja.Core.Entity.Payment", b =>
-                {
-                    b.Navigation("Contribution")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Noja.Core.Entity.Team", b =>
                 {
-                    b.Navigation("Contributions");
-
                     b.Navigation("Members");
                 });
 

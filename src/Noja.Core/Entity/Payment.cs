@@ -46,7 +46,9 @@ namespace Noja.Core.Entity
         public int SimulationDelaySeconds { get; set; } = 2;
 
         [MaxLength(500)]
-        public string FailureReason { get; set; }
+        public string? FailureReason { get; set; }
+
+        public Contribution Contribution { get; set; }
 
         // Display properties
         [NotMapped]

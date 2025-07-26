@@ -61,6 +61,7 @@ namespace Noja.Core.Entity
 
         // Participants (including Creator)
         public ICollection<TeamMember> Members { get; set; } = new List<TeamMember>();
+        public ICollection<Contribution> Contributions { get; set; } = new List<Contribution>();
 
         // ===== Contants ===== //
         private const int EXPIRY_HOURS = 72;

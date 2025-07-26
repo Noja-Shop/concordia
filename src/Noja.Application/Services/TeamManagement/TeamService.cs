@@ -64,7 +64,7 @@ namespace Noja.Application.Services.TeamManagement
                     return response;
                 }
 
-                if (createTeamDto.CreatorQuantity > createTeamDto.TargetQuantity)
+                if (createTeamDto.CreatorQuantity > product.PackageSize)
                 {
                     response.Success = false;
                     response.Message = "Creator's quantity cannot be greater than target quantity";
@@ -73,46 +73,75 @@ namespace Noja.Application.Services.TeamManagement
 
                 // Team calculation: calculate amounts
                 var unitPrice = product.UnitPrice;
-                var targetAmount = createTeamDto.TargetQuantity * unitPrice;
+                var totalProductPrice = unitPrice * product.PackageSize;
                 var creatorAmount = createTeamDto.CreatorQuantity * unitPrice;
 
-                // 1. create payment for team creator
-                 var creatorPayment = new Payment
+                if (creatorAmount > totalProductPrice)
                 {
-                    CustomerId = customerId,
-                    TeamId = Guid.Empty,
-                    Amount = creatorAmount,
-                    PaymentMethod = createTeamDto.PaymentMethod,
-                    Status = PaymentStatus.Pending,
-                    SimulateSuccess = createTeamDto.SimulatePaymentSuccess,
-                    SimulationDelaySeconds = 2,
-                    CreatedAt = DateTime.UtcNow
-                };
+                    response.Success = false;
+                    response.Message = "Creator's amount cannot be greater than total product price";
+                    return response;
+                }
+                
 
-                var createdPayment = await _paymentRepository.CreateAsync(creatorPayment);
-
-                // 2. create team entity
-                var team = new Team
+                 var team = new Team
                 {
                     Name = createTeamDto.Name?.Trim() ?? $"{product.Name}",
                     Description = createTeamDto.Description,
                     Product = product,
                     ProductId = createTeamDto.ProductId,
-                    TargetQuantity = createTeamDto.TargetQuantity,
-                    TargetAmount = targetAmount,
+                    CreatedBy = customerId,
+                    // TargetQuantity = createTeamDto.TargetQuantity,
+                    TargetAmount = creatorAmount,
                     UnitPrice = unitPrice,
+                    Contributions = new List<Contribution>(), // Initialize contributions
                     // MinParticipants = createTeamDto.MinParticipants,
                     Status = TeamStatus.Active
                 };
-
+                
                 // Initialize expiry (from now up to 72 hrs)
                 team.InitializeExpiry();
 
                 // save team to the database
-                var createdTeam = await _teamRepository.CreateAsync(team);
+                var createTeam = await _teamRepository.CreateAsync(team);
+
+                // 1. create payment for team creator
+                var creatorPayment = new Payment
+                {
+                    CustomerId = customerId,
+                    TeamId = createTeam.Id,
+                    Amount = creatorAmount,
+                    PaymentMethod = createTeamDto.PaymentMethod,
+                    Status = PaymentStatus.Pending,
+                    SimulateSuccess = createTeamDto.SimulatePaymentSuccess,
+                   
+                    SimulationDelaySeconds = 2,
+                    CreatedAt = DateTime.UtcNow,
+                };
+
+                creatorPayment.TransactionReference = GenerateTransactionReference(creatorPayment);
+
+                var createdPayment = await _paymentRepository.CreateAsync(creatorPayment);
+
+                // 2. create team entity
+               
+
+                
 
                 // 3. update payment with team ID
-                createdPayment.TeamId = createdTeam.Id;
+                createdPayment.TeamId = createTeam.Id;
+
+                var contribution = new Contribution
+                {
+                    CustomerId = customerId,
+                    TeamId = createTeam.Id,
+                    Quantity = createTeamDto.CreatorQuantity,
+                    Amount = creatorAmount,
+                    CreatedAt = DateTime.UtcNow,
+                    PaymentId = createdPayment.Id
+                };
+
+                team.Contributions.Add(contribution);
 
                 // Payment update would need to be implemented in PaymentService
 
@@ -131,7 +160,7 @@ namespace Noja.Application.Services.TeamManagement
                 // 5. create team member for creator
                 var creatorMember = new TeamMember
                 {
-                    TeamId = createdTeam.Id,
+                    TeamId = createTeam.Id,
                     CustomerId = customerId,
                     Quantity = createTeamDto.CreatorQuantity,
                     AmountPaid = creatorAmount,
@@ -141,7 +170,7 @@ namespace Noja.Application.Services.TeamManagement
                 var createdMember = await _memberRepository.CreateAsync(creatorMember);
 
                 // 6. Get compete team with members for response
-                var teamComplete = await _teamRepository.GetByIdWithMemberAsync(createdTeam.Id);
+                var teamComplete = await _teamRepository.GetByIdWithMemberAsync(createTeam.Id);
 
                 // 7. map to dto and return
                 response.Success = true;

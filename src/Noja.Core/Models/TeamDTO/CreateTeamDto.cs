@@ -18,10 +18,10 @@ namespace Noja.Core.Models.TeamDTO
 
         [Required]
         public Guid ProductId { get; set; }
-        
-        [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Target quantity must be greater than 0")]
-        public decimal TargetQuantity { get; set; }
+    
+        // [Required]
+        // [Range(0.01, double.MaxValue, ErrorMessage = "Target quantity must be greater than 0")]
+        // public decimal TargetQuantity { get; set; }
 
         [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "Creator quantity must be greater than 0")]
