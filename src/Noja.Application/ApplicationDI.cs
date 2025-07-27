@@ -27,6 +27,7 @@ namespace Noja.Application
 
             // ====== team management services ====== //
             services.AddScoped<ITeamService, TeamService>();
+            services.AddScoped<IContributionService, ContributionService>();
 
             return services;
         }

@@ -56,6 +56,7 @@ namespace Noja.Infrastructure
             services.AddScoped<ITeamRepository, TeamRepository>();
             services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<IContributionRepository, ContributionRepository>();
 
             return services;
         }

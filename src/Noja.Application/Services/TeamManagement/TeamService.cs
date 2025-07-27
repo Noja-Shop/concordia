@@ -20,16 +20,19 @@ namespace Noja.Application.Services.TeamManagement
         private readonly ITeamMemberRepository _memberRepository;
         private readonly IPaymentRepository _paymentRepository;
         private readonly IProductRepository _productRepository;
+        private readonly IContributionService _contributionService;
 
         public TeamService(ITeamRepository teamRepository,
             ITeamMemberRepository memberRepository,
             IPaymentRepository paymentRepository,
-            IProductRepository productRepository)
+            IProductRepository productRepository,
+            IContributionService contributionService)
         {
             _teamRepository = teamRepository;
             _memberRepository = memberRepository;
             _paymentRepository = paymentRepository;
             _productRepository = productRepository;
+            _contributionService = contributionService;
         }
         public async Task<ServiceResponse<TeamDto>> CreateTeamAsync(string customerId, CreateTeamDto createTeamDto)
         {
@@ -91,7 +94,7 @@ namespace Noja.Application.Services.TeamManagement
                     Product = product,
                     ProductId = createTeamDto.ProductId,
                     CreatedBy = customerId,
-                    // TargetQuantity = createTeamDto.TargetQuantity,
+                    TargetQuantity = product.PackageSize,
                     TargetAmount = creatorAmount,
                     UnitPrice = unitPrice,
                     Contributions = new List<Contribution>(), // Initialize contributions
@@ -126,22 +129,29 @@ namespace Noja.Application.Services.TeamManagement
                 // 2. create team entity
                
 
-                
 
                 // 3. update payment with team ID
-                createdPayment.TeamId = createTeam.Id;
-
-                var contribution = new Contribution
+                
+                await _contributionService.AddContributionAsync(new CreateContributionDto
                 {
-                    CustomerId = customerId,
                     TeamId = createTeam.Id,
+                    CustomerId = customerId,
                     Quantity = createTeamDto.CreatorQuantity,
                     Amount = creatorAmount,
-                    CreatedAt = DateTime.UtcNow,
                     PaymentId = createdPayment.Id
-                };
+                },true);
 
-                team.Contributions.Add(contribution);
+                // var contribution = new Contribution
+                // {
+                //     CustomerId = customerId,
+                //     TeamId = createTeam.Id,
+                //     Quantity = createTeamDto.CreatorQuantity,
+                //     Amount = creatorAmount,
+                //     CreatedAt = DateTime.UtcNow,
+                //     PaymentId = createdPayment.Id
+                // };
+
+                // team.Contributions.Add(contribution);
 
                 // Payment update would need to be implemented in PaymentService
 
