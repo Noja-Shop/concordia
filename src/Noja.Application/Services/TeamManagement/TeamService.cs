@@ -39,31 +39,19 @@ namespace Noja.Application.Services.TeamManagement
             var response = new ServiceResponse<TeamDto>();
             try
             {
-                if (createTeamDto == null)
+                if (createTeamDto == null || string.IsNullOrEmpty(customerId))
                 {
                     response.Success = false;
                     response.Message = "Team creation data is required";
                     return response;
                 }
-                if (string.IsNullOrEmpty(customerId))
-                {
-                    response.Success = false;
-                    response.Message = "Customer ID is required";
-                    return response;
-                }
 
                 var product = await _productRepository.GetProductById(createTeamDto.ProductId);
-                if (product == null)
-                {
-                    response.Success = false;
-                    response.Message = "Product not found";
-                    return response;
-                }
 
-                if (!product.IsActive || !product.IsInStock)
+                if (!product.IsActive || !product.IsInStock || product == null)
                 {
                     response.Success = false;
-                    response.Message = "Product is not available for team creation";
+                    response.Message = "Product is not available or not available";
                     return response;
                 }
 
@@ -74,7 +62,7 @@ namespace Noja.Application.Services.TeamManagement
                     return response;
                 }
 
-                // Team calculation: calculate amounts
+                // calculate amounts
                 var unitPrice = product.UnitPrice;
                 var totalProductPrice = unitPrice * product.PackageSize;
                 var creatorAmount = createTeamDto.CreatorQuantity * unitPrice;
@@ -86,7 +74,6 @@ namespace Noja.Application.Services.TeamManagement
                     return response;
                 }
                 
-
                  var team = new Team
                 {
                     Name = createTeamDto.Name?.Trim() ?? $"{product.Name}",
@@ -97,8 +84,7 @@ namespace Noja.Application.Services.TeamManagement
                     TargetQuantity = product.PackageSize,
                     TargetAmount = creatorAmount,
                     UnitPrice = unitPrice,
-                    Contributions = new List<Contribution>(), // Initialize contributions
-                    // MinParticipants = createTeamDto.MinParticipants,
+                    Contributions = new List<Contribution>(), 
                     Status = TeamStatus.Active
                 };
                 
@@ -117,7 +103,6 @@ namespace Noja.Application.Services.TeamManagement
                     PaymentMethod = createTeamDto.PaymentMethod,
                     Status = PaymentStatus.Pending,
                     SimulateSuccess = createTeamDto.SimulatePaymentSuccess,
-                   
                     SimulationDelaySeconds = 2,
                     CreatedAt = DateTime.UtcNow,
                 };
@@ -126,12 +111,7 @@ namespace Noja.Application.Services.TeamManagement
 
                 var createdPayment = await _paymentRepository.CreateAsync(creatorPayment);
 
-                // 2. create team entity
-               
-
-
                 // 3. update payment with team ID
-                
                 await _contributionService.AddContributionAsync(new CreateContributionDto
                 {
                     TeamId = createTeam.Id,
@@ -141,19 +121,6 @@ namespace Noja.Application.Services.TeamManagement
                     PaymentId = createdPayment.Id
                 },true);
 
-                // var contribution = new Contribution
-                // {
-                //     CustomerId = customerId,
-                //     TeamId = createTeam.Id,
-                //     Quantity = createTeamDto.CreatorQuantity,
-                //     Amount = creatorAmount,
-                //     CreatedAt = DateTime.UtcNow,
-                //     PaymentId = createdPayment.Id
-                // };
-
-                // team.Contributions.Add(contribution);
-
-                // Payment update would need to be implemented in PaymentService
 
                 // 4. Process the creator's payment
                 var paymentSuccess = await ProcessPaymentDirectly(createdPayment);
