@@ -33,6 +33,26 @@ namespace Noja.Infrastructure.Repository
             return product;
         }
 
+        public async Task<Product> UpdateQuantityAsync(Guid productId, int newQuantity)
+        {
+            var product = await _context.Products
+            .FromSqlRaw("SELECT * FROM \"Products\"WHERE \"Id\" = {0} FOR UPDATE", productId)
+            .FirstOrDefaultAsync();
+
+            if (product == null)
+            {
+                throw new InvalidOperationException($"Product with ID {productId} not found");
+            }
+
+            product.Quantity = newQuantity;
+
+            // mark the Quantity property to be modified
+            _context.Entry(product).Property(q => q.Quantity).IsModified = true;
+
+            await _context.SaveChangesAsync();
+            return product;
+        }
+
         public async Task<Product> UpdateProductAsync(Product product)
         {
             _context.Entry(product).State = EntityState.Modified;

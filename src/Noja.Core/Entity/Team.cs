@@ -217,7 +217,6 @@ namespace Noja.Core.Entity
             TeamStatus.Active when IsSuccessful => "🎯 All Targets Reached",
             TeamStatus.Active when IsAmountTargetReached => "💰 Payment Target Reached",
             TeamStatus.Active when IsQuantityTargetReached => "📦 Quantity Target Reached",
-
             TeamStatus.Active => IsTargetReached ? "Completed" : "Active",
             TeamStatus.Completed => "Completed",
             TeamStatus.Cancelled => "Cancelled",

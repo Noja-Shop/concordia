@@ -10,6 +10,7 @@ using Noja.Core.Enums.Team;
 using Noja.Core.Interfaces.Repository;
 using Noja.Core.Interfaces.Repository.Teams;
 using Noja.Core.Models.TeamDTO;
+using Noja.Infrastructure.Data;
 
 namespace Noja.Application.Services.TeamManagement
 {
@@ -21,22 +22,28 @@ namespace Noja.Application.Services.TeamManagement
         private readonly IPaymentRepository _paymentRepository;
         private readonly IProductRepository _productRepository;
         private readonly IContributionService _contributionService;
+        private readonly NojaDbContext _context;
 
         public TeamService(ITeamRepository teamRepository,
             ITeamMemberRepository memberRepository,
             IPaymentRepository paymentRepository,
             IProductRepository productRepository,
-            IContributionService contributionService)
+            IContributionService contributionService,
+            NojaDbContext context
+            )
         {
             _teamRepository = teamRepository;
             _memberRepository = memberRepository;
             _paymentRepository = paymentRepository;
             _productRepository = productRepository;
             _contributionService = contributionService;
+            _context = context;
         }
         public async Task<ServiceResponse<TeamDto>> CreateTeamAsync(string customerId, CreateTeamDto createTeamDto)
         {
             var response = new ServiceResponse<TeamDto>();
+            
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 if (createTeamDto == null || string.IsNullOrEmpty(customerId))
@@ -73,8 +80,8 @@ namespace Noja.Application.Services.TeamManagement
                     response.Message = "Creator's amount cannot be greater than total product price";
                     return response;
                 }
-                
-                 var team = new Team
+
+                var team = new Team
                 {
                     Name = createTeamDto.Name?.Trim() ?? $"{product.Name}",
                     Description = createTeamDto.Description,
@@ -84,10 +91,10 @@ namespace Noja.Application.Services.TeamManagement
                     TargetQuantity = product.PackageSize,
                     TargetAmount = creatorAmount,
                     UnitPrice = unitPrice,
-                    Contributions = new List<Contribution>(), 
+                    Contributions = new List<Contribution>(),
                     Status = TeamStatus.Active
                 };
-                
+
                 // Initialize expiry (from now up to 72 hrs)
                 team.InitializeExpiry();
 
@@ -119,7 +126,7 @@ namespace Noja.Application.Services.TeamManagement
                     Quantity = createTeamDto.CreatorQuantity,
                     Amount = creatorAmount,
                     PaymentId = createdPayment.Id
-                },true);
+                }, true);
 
 
                 // 4. Process the creator's payment
@@ -133,6 +140,9 @@ namespace Noja.Application.Services.TeamManagement
                     response.Message = $"Payment processing failed: {createdPayment.FailureReason}";
                     return response;
                 }
+
+                // an update to the Quantity that decreases it when a team is Active
+                await _productRepository.UpdateQuantityAsync(product.Id, product.Quantity - 1);
 
                 // 5. create team member for creator
                 var creatorMember = new TeamMember
@@ -149,6 +159,9 @@ namespace Noja.Application.Services.TeamManagement
                 // 6. Get compete team with members for response
                 var teamComplete = await _teamRepository.GetByIdWithMemberAsync(createTeam.Id);
 
+                // saves the transaction/atomicity operation block
+                await transaction.CommitAsync();
+
                 // 7. map to dto and return
                 response.Success = true;
                 response.Message = "Team created successfully";
@@ -157,6 +170,7 @@ namespace Noja.Application.Services.TeamManagement
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 response.Success = false;
                 response.Message = "An error occurred while creating the team: " + ex.Message;
                 return response;

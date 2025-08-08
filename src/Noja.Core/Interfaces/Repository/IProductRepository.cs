@@ -37,6 +37,8 @@ namespace Noja.Core.Interfaces.Repository
         // </summary>
         Task<Product> UpdateProductAsync(Product product);
 
+        Task<Product> UpdateQuantityAsync(Guid productId, int newQuantity);
+
         // <summary>
         // Soft deletes a product(sets IsActive = false)
         // <param name = "id"> Product ID to delete </param>
