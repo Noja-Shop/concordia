@@ -364,6 +364,7 @@ namespace Noja.Application.Services.TeamManagement
                     CreatedAt = DateTime.UtcNow
                 };
 
+                payment.TransactionReference = GenerateTransactionReference(payment);
 
                 // 1. create payment for joining member
                 var createdPayment = await _paymentRepository.CreateAsync(payment);
