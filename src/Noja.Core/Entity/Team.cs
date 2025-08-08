@@ -100,7 +100,7 @@ namespace Noja.Core.Entity
         public int CurrentParticipants => Members?.Count ?? 0;
 
         [NotMapped]
-        public decimal TotalCommitted => Members?.Sum(m => m.AmountPaid) ?? 0;
+        public decimal TotalCommitted => Members?.Sum(m => m.Quantity) ?? 0;
 
         [NotMapped]
         public decimal TotalPaid => Members?

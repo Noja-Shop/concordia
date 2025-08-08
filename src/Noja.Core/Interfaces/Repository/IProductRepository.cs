@@ -37,6 +37,12 @@ namespace Noja.Core.Interfaces.Repository
         // </summary>
         Task<Product> UpdateProductAsync(Product product);
 
+        // <summary>
+        // Decreases the Quantity of a product whe a Team is created
+        // <param name = "productId"> Product ID to update </param>
+        // <param name = "newQuantity"> New stock quantity </param>
+        // <returns> Updated product with new quantity </returns>
+        // </summary>
         Task<Product> UpdateQuantityAsync(Guid productId, int newQuantity);
 
         // <summary>
