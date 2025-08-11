@@ -6,6 +6,8 @@ using System.Text;
 using Scalar.AspNetCore;
 using Noja.Application.Services.Auth;
 using System.IdentityModel.Tokens.Jwt;
+using Noja.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +18,11 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // Infrastructure services
-builder.Services.AddInfrastructure(builder.Configuration);
+
+// Load environment-based config (Development / Production)
+var configuration = builder.Configuration;
+
+builder.Services.AddInfrastructure(builder.Configuration,builder.Environment);
 
 //Application services
 builder.Services.AddApplication();
