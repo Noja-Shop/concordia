@@ -55,5 +55,11 @@ namespace Noja.API.Controllers.AuthAdmin
             return Ok(result);
         }
 
+        [HttpGet("ping")]
+        public IActionResult Ping()
+        {
+                return Ok(new {status = "Noja API is running", time = DateTime.UtcNow});
+        }
+
     }
 }
