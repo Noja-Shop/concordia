@@ -14,6 +14,9 @@ using Noja.Infrastructure.Authentication;
 using Noja.Infrastructure.Data;
 using Noja.Infrastructure.Options;
 using Noja.Infrastructure.Repository;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+
 
 
 
@@ -22,11 +25,34 @@ namespace Noja.Infrastructure
     public static class InfrastrutureDI
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,IWebHostEnvironment env)
         {
             services.Configure<JwtOption>(options => configuration.GetSection(JwtOption.JwtOptionKey));
-            services.AddDbContext<NojaDbContext>(options => options.
-            UseNpgsql(configuration.GetConnectionString("DbConnectionString")));
+            // services.AddDbContext<NojaDbContext>(options => options.
+            // UseNpgsql(configuration.GetConnectionString("DbConnectionString")));
+
+             var connStr = configuration.GetConnectionString("DbConnectionString")
+                  ?? configuration["ConnectionStrings:DbConnectionString"];
+
+            // var certPath = Path.Combine(contentRootPath, "BaltimoreCyberTrustRoot.crt.pem");
+
+            // services.AddDbContext<NojaDbContext>(options =>
+            //     options.UseNpgsql($"{connStr};Ssl Mode=Require;Trust Server Certificate=true;Ssl Root Cert={certPath}")
+            // );
+
+            if (env.IsDevelopment())
+            {
+                // Local DB without SSL
+                services.AddDbContext<NojaDbContext>(options =>
+                    options.UseNpgsql(connStr));
+            }
+            else
+            {
+                // Azure DB with SSL cert
+                var certPath = Path.Combine(env.ContentRootPath, "BaltimoreCyberTrustRoot.crt.pem");
+                services.AddDbContext<NojaDbContext>(options =>
+                    options.UseNpgsql($"{connStr};Ssl Mode=Require;Trust Server Certificate=true;Ssl Root Cert={certPath}"));
+            }
 
             services.AddIdentityCore<NojaUser>(options => 
             {
