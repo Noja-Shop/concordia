@@ -11,7 +11,7 @@ permissions:
 
 env:
   SOLUTION_NAME: Noja.sln
-  PROJECT_PATH: Noja.API/Noja.API.csproj
+  PROJECT_PATH: src/Noja.API/Noja.API.csproj
   BUILD_CONFIG: Release
   
 
@@ -77,7 +77,7 @@ jobs:
       - name: Set App Service connection string for Dev
         uses: azure/appservice-settings@v1
         with:
-          app-name: 'andishi'
+          app-name: 'noja-staging'
           app-settings-json: '[
             {
               "name": "ConnectionStrings__DefaultConnectionString",
