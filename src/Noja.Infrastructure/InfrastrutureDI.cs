@@ -24,8 +24,7 @@ namespace Noja.Infrastructure
 {
     public static class InfrastrutureDI
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services,
-        IConfiguration configuration,IWebHostEnvironment env)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services,IConfiguration configuration)
         {
             services.Configure<JwtOption>(options => configuration.GetSection(JwtOption.JwtOptionKey));
             services.AddDbContext<NojaDbContext>(options => options.

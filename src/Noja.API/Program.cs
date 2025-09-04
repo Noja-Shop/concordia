@@ -22,7 +22,7 @@ builder.Services.AddOpenApi();
 // Load environment-based config (Development / Production)
 var configuration = builder.Configuration;
 
-builder.Services.AddInfrastructure(builder.Configuration,builder.Environment);
+builder.Services.AddInfrastructure(builder.Configuration);
 
 //Application services
 builder.Services.AddApplication();
