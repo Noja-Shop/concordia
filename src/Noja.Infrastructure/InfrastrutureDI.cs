@@ -28,31 +28,8 @@ namespace Noja.Infrastructure
         IConfiguration configuration,IWebHostEnvironment env)
         {
             services.Configure<JwtOption>(options => configuration.GetSection(JwtOption.JwtOptionKey));
-            // services.AddDbContext<NojaDbContext>(options => options.
-            // UseNpgsql(configuration.GetConnectionString("DbConnectionString")));
-
-             var connStr = configuration.GetConnectionString("DbConnectionString")
-                  ?? configuration["ConnectionStrings:DbConnectionString"];
-
-            // var certPath = Path.Combine(contentRootPath, "BaltimoreCyberTrustRoot.crt.pem");
-
-            // services.AddDbContext<NojaDbContext>(options =>
-            //     options.UseNpgsql($"{connStr};Ssl Mode=Require;Trust Server Certificate=true;Ssl Root Cert={certPath}")
-            // );
-
-            if (env.IsDevelopment())
-            {
-                // Local DB without SSL
-                services.AddDbContext<NojaDbContext>(options =>
-                    options.UseNpgsql(connStr));
-            }
-            else
-            {
-                // Azure DB with SSL cert
-                var certPath = Path.Combine(env.ContentRootPath, "BaltimoreCyberTrustRoot.crt.pem");
-                services.AddDbContext<NojaDbContext>(options =>
-                    options.UseNpgsql($"{connStr};Ssl Mode=Require;Trust Server Certificate=true;Ssl Root Cert={certPath}"));
-            }
+            services.AddDbContext<NojaDbContext>(options => options.
+            UseNpgsql(configuration.GetConnectionString("DefaultConnectionString")));
 
             services.AddIdentityCore<NojaUser>(options => 
             {

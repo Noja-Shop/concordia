@@ -1,0 +1,132 @@
+name: Deploy to Azure app
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  SOLUTION_NAME: Noja.sln
+  PROJECT_PATH: Noja.API/Noja.API.csproj
+  BUILD_CONFIG: Release
+  
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0'
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION_NAME }}
+      - name: Publish application
+        run: dotnet publish ${{ env.PROJECT_PATH }} --configuration ${{ env.BUILD_CONFIG }} --output ./publish
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-app
+          path: ./publish
+
+  deploy-dev:
+    if: github.ref == 'refs/heads/dev'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: published-app
+          path: ./publish
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0'
+      - name: Install EF Core Tools
+        run: dotnet tool install --global dotnet-ef
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_DEV }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Run Dev Database Migrations
+        run: dotnet ef database update --project ${{ env.PROJECT_PATH }}
+        env:
+          ConnectionStrings__DefaultConnectionString: ${{ secrets.NEON_CONNECTION_STRING_DEV }}
+      - name: Deploy to Azure Dev App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'noja-staging'
+          package: './publish'
+      - name: Set App Service connection string for Dev
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'andishi'
+          app-settings-json: '[
+            {
+              "name": "ConnectionStrings__DefaultConnectionString",
+              "value": "${{ secrets.NEON_CONNECTION_STRING_DEV }}",
+              "slotSetting": false
+            }
+          ]'
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: published-app
+          path: ./publish
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0'
+      - name: Install EF Core Tools
+        run: dotnet tool install --global dotnet-ef
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_PROD }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_PROD }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
+      - name: Run Main Database Migrations
+        run: dotnet ef database update --project ${{ env.PROJECT_PATH }}
+        env:
+          ConnectionStrings__DefaultConnectionString: ${{ secrets.NEON_CONNECTION_STRING_PROD }}
+      - name: Deploy to Azure Prod App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'andishi-api'
+          package: './publish'
+      - name: Set App Service connection string for Prod
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'andishi-api'
+          app-settings-json: '[
+            {
+              "name": "ConnectionStrings__DefaultConnectionString",
+              "value": "${{ secrets.NEON_CONNECTION_STRING_PROD }}",
+              "slotSetting": false
+            }
+          ]'
