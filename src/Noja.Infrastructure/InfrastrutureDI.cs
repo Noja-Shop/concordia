@@ -28,7 +28,7 @@ namespace Noja.Infrastructure
         {
             services.Configure<JwtOption>(options => configuration.GetSection(JwtOption.JwtOptionKey));
             services.AddDbContext<NojaDbContext>(options => options.
-            UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            UseNpgsql(configuration.GetConnectionString("DefaultConnectionString")));
 
             services.AddIdentityCore<NojaUser>(options => 
             {
