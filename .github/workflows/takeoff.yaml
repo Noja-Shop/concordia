@@ -68,6 +68,7 @@ jobs:
       - name: Run Dev Database Migrations
         run: dotnet ef database update --project src/Noja.Infrastructure/Noja.Infrastructure.csproj --startup-project src/Noja.API/Noja.API.csproj
         env:
+          ASPNETCORE_ENVIRONMENT: Staging
           ConnectionStrings__DefaultConnectionString: ${{ secrets.NEON_CONNECTION_STRING_DEV }}
       - name: Deploy to Azure Dev App
         uses: azure/webapps-deploy@v3
