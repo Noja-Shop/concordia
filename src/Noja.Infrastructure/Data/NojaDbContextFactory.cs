@@ -37,11 +37,11 @@ namespace Noja.Infrastructure.Data
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            var connectionString = configuration.GetConnectionString("DbConnectionString");
+            var connectionString = configuration.GetConnectionString("DefaultConnectionString");
             
             if (string.IsNullOrEmpty(connectionString))
             {
-                throw new InvalidOperationException("Could not find a connection string named 'DefaultConnection'");
+                throw new InvalidOperationException("Could not find a connection string named 'DefaultConnectionString'");
             }
 
             var optionsBuilder = new DbContextOptionsBuilder<NojaDbContext>();

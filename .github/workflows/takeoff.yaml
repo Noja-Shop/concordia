@@ -68,7 +68,7 @@ jobs:
       - name: Run Dev Database Migrations
         run: dotnet ef database update --project src/Noja.API/Noja.API.csproj
         env:
-          ConnectionStrings__DefaultConnection: ${{ secrets.NEON_CONNECTION_STRING_DEV }}
+          ConnectionStrings__DefaultConnectionString: ${{ secrets.NEON_CONNECTION_STRING_DEV }}
       - name: Deploy to Azure Dev App
         uses: azure/webapps-deploy@v3
         with:
@@ -80,7 +80,7 @@ jobs:
           app-name: 'noja-staging'
           app-settings-json: '[
             {
-              "name": "ConnectionStrings__DefaultConnection",
+              "name": "ConnectionStrings__DefaultConnectionString",
               "value": "${{ secrets.NEON_CONNECTION_STRING_DEV }}",
               "slotSetting": false
             }
