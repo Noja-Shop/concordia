@@ -14,34 +14,26 @@ namespace Noja.Infrastructure.Data
     {
         public NojaDbContext CreateDbContext(string[] args)
         {
-             // Find the startup project directory (where appsettings.json is located)
-            // This assumes you're running from the solution root or the API project
-            string projectDir = Directory.GetCurrentDirectory();
-            
-            // Try to find appsettings.json by going up directories if needed
-            string configPath = Path.Combine(projectDir, "appsettings.json");
-            if (!File.Exists(configPath))
-            {
-                // Try looking in the API project directory
-                configPath = Path.Combine(projectDir, "..", "Noja.API", "appsettings.json");
-                if (!File.Exists(configPath))
-                {
-                    throw new FileNotFoundException($"Could not find appsettings.json in {projectDir} or parent directories");
-                }
-                
-                projectDir = Path.GetDirectoryName(configPath);
-            }
+            // This factory is used by `dotnet ef` CLI tools. It builds a configuration
+            // that mirrors the runtime setup to get the connection string. It assumes the
+            // command is run with Noja.API as the startup project, which sets the
+            // current directory correctly.
+            string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             IConfigurationRoot configuration = new ConfigurationBuilder()
-                .SetBasePath(projectDir)
-                .AddJsonFile("appsettings.json")
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false)
+                .AddJsonFile($"appsettings.{environment}.json", optional: true)
+                .AddEnvironmentVariables()
                 .Build();
 
             var connectionString = configuration.GetConnectionString("DefaultConnectionString");
             
             if (string.IsNullOrEmpty(connectionString))
             {
-                throw new InvalidOperationException("Could not find a connection string named 'DefaultConnectionString'");
+                throw new InvalidOperationException(
+                    "Could not find a connection string named 'DefaultConnectionString'. " +
+                    "Check your appsettings.json, environment-specific settings, or environment variables.");
             }
 
             var optionsBuilder = new DbContextOptionsBuilder<NojaDbContext>();
